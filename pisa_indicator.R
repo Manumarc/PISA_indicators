@@ -497,6 +497,104 @@ calcular_refis <- function(bd_datos,
                                            "dig_dev_total", "MATHEFF", "SCIEEFF"),
                            indic_razon = c("comp_est", "tablet_est"),
                            verbose = TRUE) {
+  
+  #========================================================================================================#
+  # Países considerados para promedios OECD y LAC
+  #========================================================================================================#
+  
+  # PISA 2009 #
+  #-----------#
+
+  oecd_09 <- c(
+    "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
+  )
+
+  lac_09 <- c(
+    "Chile", "Mexico", "Argentina", "Brazil", "Colombia", "Panama", "Peru", "Uruguay", "Costa Rica"
+  )
+
+  # PISA 2012 #
+  #-----------#
+
+  oecd_12 <- c(
+    "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
+  )
+
+  lac_12 <- c(
+    "Chile", "Mexico", "Argentina", "Brazil", "Colombia", "Costa Rica", "Peru", "Uruguay"
+  )
+
+  # PISA 2015 #
+  #-----------#
+
+  oecd_15 <- c(
+    "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Latvia", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
+  )
+
+  lac_15 <- c(
+    "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay"
+  )
+
+  # PISA 2018 #
+  #-----------#
+
+  oecd_18 <- c(
+    "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
+  )
+
+  lac_18 <- c(
+    "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "Panama", "Peru", "Uruguay"
+  )
+
+  # PISA 2022 #
+  #-----------#
+
+  oecd_22 <- c(
+    "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Costa Rica", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Türkiye", "United Kingdom", "United States"
+  )
+
+  lac_22 <- c(
+    "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Uruguay"
+  )
+
+  # PISA 2025 #
+  #-----------#
+
+  oecd_25 <- c(
+    "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Costa Rica", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Türkiye", "United Kingdom", "United States"
+  ) # Actualizar
+
+  lac_25 <- c(
+    "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Uruguay"
+  )
+
+  # Actualizar
+
+  if (anio == 2009) {
+    oecd <- oecd_09
+    lac  <- lac_09
+  } else if (anio == 2012) {
+    oecd <- oecd_12
+    lac  <- lac_12
+  } else if (anio == 2015) {
+    oecd <- oecd_15
+    lac  <- lac_15
+  } else if (anio == 2018) {
+    oecd <- oecd_18
+    lac  <- lac_18
+  } else if (anio == 2022) {
+    oecd <- oecd_22
+    lac  <- lac_22
+  } else if (anio == 2025) {
+    oecd <- oecd_25
+    lac  <- lac_25
+  }else {
+    stop("No hay grupos definidos para el año ", anio)
+  }
+  
+  gru_paises <- list(OECD = oecd, LAC = lac)
+  
+  # Inicio de los cálculos
 
   niv_estrat <- match.arg(niv_estrat)
 
@@ -598,9 +696,31 @@ calcular_refis <- function(bd_datos,
     if (length(fallidos))
       warning("Presentes pero sin resultado: ", paste(fallidos, collapse = ", "))
   }
-
-  resultado %>%
+  
+  # Promedios OECD y LAC: media simple entre países ----
+  promedios <- if (isTRUE(incluir_grupos)) {
+    imap_dfr(gru_paises, function(paises, etiqueta) {
+      resultado %>%
+        filter(.data[[grupo]] %in% paises, !is.na(estimacion), !is.na(se)) %>%
+        group_by(across(all_of(
+          c("estrato", "nivel_estrato", "indicator", "categoria", "medida")))) %>%
+        summarise(
+          n_paises   = n(),
+          estimacion = mean(estimacion),
+          se         = sqrt(sum(se^2)) / n(),   # SE de la media de k estimaciones indep.
+          .groups    = "drop"
+        ) %>%
+        filter(n_paises >= min_paises) %>%
+        mutate(!!sym(grupo) := etiqueta)
+    })
+  } else NULL
+  
+  bind_rows(
+    resultado %>% mutate(n_paises = NA_integer_),
+    promedios
+  ) %>%
     arrange(indicator, .data[[grupo]], estrato, nivel_estrato) %>%
     mutate(year = anio)
+  
 }
 
