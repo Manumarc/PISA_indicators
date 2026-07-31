@@ -568,7 +568,7 @@ calcular_refis <- function(bd_datos,
     "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Uruguay"
   )
 
-  # Países para promedios por año
+  # Actualizar
 
   if (anio == 2009) {
     oecd <- oecd_09
