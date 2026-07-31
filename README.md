@@ -2,6 +2,19 @@
 
 Funciones que construyen los indicadores de aprendizaje y recursos físicos de CIMA
 
+## Librerías necesarias 
+
+```
+library(foreign)    # Importar y exportar bases de spss
+library(openxlsx)   # Facilita la lectura de archivos de Excel (".xls" y ".xlsx")
+library(fst)        # Abre archivos ".fst, que son extremadamente rápidos para guardar y cargar grandes conjuntos de datos
+library(tidyverse)  # Un conjunto de paquetes interrelacionados diseñados para análisis de datos
+library(survey)     # Permite analizar datos provenientes de muestras complejas
+library(scales)     # Permite editar tonos, formatos de número y texto
+library(intsvy)     # Permite analizar los datos de PISA y otras International Large Scale Assessments
+library(furrr)      # Permite realizar análisis paralelizado
+```
+
 ## CARGAR LAS FUNCIONES
 
 ```
