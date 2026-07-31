@@ -186,7 +186,9 @@ resultados_rf <- future_imap(
 plan(sequential)
 gc()
 ```
-## Dar formato de 
+## Dar formato de de SCL data
+
+a la base de datos resultante de PISA se le aplica la función y se obtiene el formato de base de datos de SCL data
 
 ```
 # Dar formato de scl data #
