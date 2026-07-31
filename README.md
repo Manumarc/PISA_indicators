@@ -2,7 +2,7 @@
 
 Funciones que construyen los indicadores de aprendizaje y recursos físicos de CIMA
 
-# Uso de las funciones
+# Calcular resultados de Medida promedio y Niveles de logros a nivel nacional y por estratos
 
 ```
 # Forma de cálculo individual #
@@ -104,3 +104,22 @@ plan(sequential)
 gc()
 
 ```
+
+# Calcular resultados de recursos financieros a nivel nacional y por estratos
+
+```
+
+# Forma de cálculo individual #
+#-----------------------------#
+
+calcular_refis(
+  pisa12, 
+  anio = 2012,  
+  niv_estrat = "Estratos"          # Puede tomar los valores "Nacional" o "Estratos"
+)
+
+```
+
+
+
+
