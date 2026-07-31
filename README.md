@@ -119,7 +119,55 @@ calcular_refis(
 )
 
 ```
+ Si se quiere calcular los resultados de varios años al mismo tiempo, se puede utilizar el siguiente código
+ 
+```
+#==============================================================================#
+# Bases para refis (2009-2022)
+#==============================================================================#
 
+lista_bases_rf <- list(pisa09, pisa12, pisa15, pisa18, pisa22) %>%
+  set_names(c(2009, 2012, 2015, 2018, 2022))
 
+#==============================================================================#
+# Paralelización
+#==============================================================================#
+
+options(future.globals.maxSize = 3 * 1024^3)
+plan(multisession, workers = 2)
+
+resultados_rf <- future_imap(
+  lista_bases_rf,
+  function(base, anio_chr) {
+
+    calcular_seguro <- possibly(calcular_refis, otherwise = NULL)
+    anio <- as.integer(anio_chr)
+
+    map(
+      c("Nacional", "Estratos"),
+      function(niv_estrat) {
+        res <- calcular_seguro(
+          bd_datos   = base,
+          anio       = anio,
+          niv_estrat = niv_estrat,
+          verbose    = FALSE        
+        )
+        if (is.null(res)) return(NULL)
+        res 
+      }
+    ) %>%
+      bind_rows()
+  },
+  .options = furrr_options(
+    seed       = TRUE,
+    packages   = c("intsvy", "dplyr", "tidyr", "purrr", "stringr", "tibble"),
+    scheduling = Inf     
+  )
+) %>%
+  bind_rows()
+
+plan(sequential)
+gc()
+```
 
 
