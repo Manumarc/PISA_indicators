@@ -15,7 +15,7 @@ library(intsvy)     # Permite analizar los datos de PISA y otras International L
 library(furrr)      # Permite realizar análisis paralelizado
 ```
 
-## CARGAR LAS FUNCIONES
+## Cargar las funciones
 
 ```
 source(url("https://raw.githack.com/Manumarc/PISA_indicators/main/pisa_indicator.R"))
