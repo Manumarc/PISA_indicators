@@ -186,5 +186,12 @@ resultados_rf <- future_imap(
 plan(sequential)
 gc()
 ```
+## Dar formato de 
 
+```
+# Dar formato de scl data #
+#-------------------------#
+
+pisa_to_scldata(bd_datos)
+```
 
