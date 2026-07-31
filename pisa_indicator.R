@@ -717,7 +717,8 @@ calcular_refis <- function(bd_datos,
     promedios
   ) %>%
     arrange(indicator, .data[[grupo]], estrato, nivel_estrato) %>%
-    mutate(year = anio)
+    mutate(year = anio) %>%
+    rename(pais = CNT)
   
 }
 
