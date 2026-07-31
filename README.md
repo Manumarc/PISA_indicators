@@ -4,8 +4,10 @@ Funciones que construyen los indicadores de aprendizaje y recursos físicos de C
 
 ## CARGAR LAS FUNCIONES
 
+```
 source(url("https://raw.githack.com/Manumarc/PISA_indicators/main/pisa_indicator.R"))
 
+```
 ## Calcular resultados de Medida promedio y Niveles de logros a nivel nacional y por estratos
 
 ```
