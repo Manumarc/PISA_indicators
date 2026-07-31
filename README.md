@@ -17,7 +17,7 @@ Funciones que construyen los indicadores de aprendizaje y recursos físicos de C
       )
 
 ```
- Si se quiere calcular los resultados de varios años al mismo tiempo, se puede utilizar el siguiente código
+ Si se quiere calcular los resultados de varios años al mismo tiempo, se puede utilizar el siguiente código. Las funciones a nivel nacional y por estratos consideran promedio LAC y promedio OECD para todas las áreas.
 
 ```
 #==============================================================================#
