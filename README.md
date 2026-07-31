@@ -9,7 +9,6 @@ source(url("https://raw.githack.com/Manumarc/PISA_indicators/main/pisa_indicator
 
 ```
 ## Calcular resultados de Medida promedio y Niveles de logros a nivel nacional y por estratos
-
 ```
 # Forma de cálculo individual #
 #-----------------------------#
@@ -21,7 +20,6 @@ source(url("https://raw.githack.com/Manumarc/PISA_indicators/main/pisa_indicator
         calculo = "MP",              # Puede tomar los valores "MP" o "Niveles"
         niv_estrat = "Nacional"      # Puede tomar los valores "Nacional" o "Estratos"
       )
-
 ```
  Si se quiere calcular los resultados de varios años al mismo tiempo, se puede utilizar el siguiente código. Las funciones a nivel nacional y por estratos consideran promedio LAC y promedio OECD para todas las áreas.
 
