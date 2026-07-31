@@ -568,7 +568,7 @@ calcular_refis <- function(bd_datos,
     "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Uruguay"
   )
 
-  # Actualizar
+  # Países para promedios por año
 
   if (anio == 2009) {
     oecd <- oecd_09
@@ -697,23 +697,20 @@ calcular_refis <- function(bd_datos,
       warning("Presentes pero sin resultado: ", paste(fallidos, collapse = ", "))
   }
   
-  # Promedios OECD y LAC: media simple entre países ----
-  promedios <- if (isTRUE(incluir_grupos)) {
-    imap_dfr(gru_paises, function(paises, etiqueta) {
-      resultado %>%
-        filter(.data[[grupo]] %in% paises, !is.na(estimacion), !is.na(se)) %>%
-        group_by(across(all_of(
-          c("estrato", "nivel_estrato", "indicator", "categoria", "medida")))) %>%
-        summarise(
-          n_paises   = n(),
-          estimacion = mean(estimacion),
-          se         = sqrt(sum(se^2)) / n(),   # SE de la media de k estimaciones indep.
-          .groups    = "drop"
-        ) %>%
-        filter(n_paises >= min_paises) %>%
-        mutate(!!sym(grupo) := etiqueta)
-    })
-  } else NULL
+  # Promedios OECD y LAC: media simple entre países
+  promedios <- imap_dfr(gru_paises, function(paises, etiqueta) {
+    resultado %>%
+      filter(.data[[grupo]] %in% paises, !is.na(estimacion), !is.na(se)) %>%
+      group_by(across(all_of(
+        c("estrato", "nivel_estrato", "indicator", "categoria", "medida")))) %>%
+      summarise(
+        n_paises   = n(),
+        estimacion = mean(estimacion),
+        se         = sqrt(sum(se^2)) / n(),   # SE de la media de k estimaciones indep.
+        .groups    = "drop"
+      ) %>%
+      mutate(!!sym(grupo) := etiqueta)
+  })
   
   bind_rows(
     resultado %>% mutate(n_paises = NA_integer_),
