@@ -721,3 +721,124 @@ calcular_refis <- function(bd_datos,
   
 }
 
+#############################################
+#############################################
+# Formato de base SCL
+#############################################
+#############################################      
+
+pisa_to_scldata <- function(bd_datos) {
+
+  orden <- c("iddate","year","idgeo","isoalpha3","source","indicator","area",
+             "quintile","sex","education_level","age","ethnicity","value","se","cv",
+             "sample","language","collection_es","collection_en","theme_es","theme_en",
+             "disability","migration","management","funding","month","totals_dummy",
+             "admin1_ipums","level","dummy_GDI","scldata3_highlight_profile",
+             "scldata3_highlight_census","quality_check","dt",
+             "indicadoresAbleToBeMoreThanOne")
+
+  # Dimensiones que van como "Total" #
+  #----------------------------------#
+  
+  dims_total <- c("area","quintile","sex","education_level","age","ethnicity",
+                  "language","disability","migration","management","funding")
+
+  # Nombre de los estratos #
+  #------------------------#
+  
+  rename_estratos <- c(funding    = "financia",
+                       management = "gestion",
+                       language   = "lengua",
+                       quintile   = "quintil_escs")
+
+  # Automatización de variables fijas #
+  #-----------------------------------#
+  
+  ensure_dims <- function(df) {
+    faltan <- setdiff(dims_total, names(df))
+    if (length(faltan)) df[faltan] <- "Total"
+    df
+  }
+
+  add_constantes <- function(df) {
+    df %>% mutate(
+      cv          = se / value,
+      iddate      = "year",
+      idgeo       = "country",
+      source      = "PISA",
+      sample      = NA,
+      collection_es = "",
+      collection_en = "",
+      theme_es    = "Educación",
+      theme_en    = "Education",
+      month       = NA_character_,
+      totals_dummy = 1,
+      admin1_ipums = NA,
+      level       = NA,
+      dummy_GDI   = 0,
+      scldata3_highlight_profile = NA,
+      scldata3_highlight_census  = NA,
+      quality_check = NA,
+      dt          = paste0(year, "-01-01"),
+      indicadoresAbleToBeMoreThanOne = 0
+    )
+  }
+
+  # Base de datos modificada # 
+  #--------------------------#
+  
+  a1 <- bd_datos %>%
+    mutate(
+      pais = case_when(
+        pais %in% c("OECD","LAC") ~ pais,
+        TRUE ~ str_to_title(pais)
+      ),
+      pais = case_when(
+        pais %in% "Trinidad And Tobago" ~ "Trinidad and Tobago",
+        TRUE ~ pais
+      ),
+      pais = case_when(
+        pais %in% c("OECD","LAC") ~ pais,
+        TRUE ~ countrycode(pais, origin = "country.name", destination = "iso3c", warn = TRUE)
+      ),
+      indicator = case_when(
+        is.na(Benchmarks) & competencia %in% "Lectura" ~ "puntaje_prom_lec",
+        is.na(Benchmarks) & competencia %in% "Matemática" ~ "puntaje_prom_mat",
+        is.na(Benchmarks) & competencia %in% "Ciencia" ~ "puntaje_prom_cie",
+        Benchmarks %in% c("<= 407.47") ~ "tasa_bajo_desemp_lec",
+        Benchmarks %in% c("<= 420.07") ~ "tasa_bajo_desemp_mat",
+        Benchmarks %in% c("<= 409.54") ~ "tasa_bajo_desemp_cie",
+        Benchmarks %in% c("> 625.61") ~ "tasa_alto_desemp_lec",
+        Benchmarks %in% c("> 606.99") ~ "tasa_alto_desemp_mat",
+        Benchmarks %in% c("> 633.33") ~ "tasa_alto_desemp_cie",
+        TRUE ~ NA_character_
+      )
+    )
+
+  # Resultados a nivel nacional #
+  #-----------------------------#
+  
+  nac <- a1 %>%
+    filter(niv_estrat == "Nacional") %>%
+    dplyr::select(year = anio, isoalpha3 = pais, value = valor, se, indicator)
+
+  # Resultados a nivel de estratos #
+  #--------------------------------#
+  
+  estrat <- a1 %>%
+    filter(niv_estrat == "Estratos") %>%
+    dplyr::select(year = anio, isoalpha3 = pais, estrato, categoria,
+                  value = valor, se, indicator) %>%
+    mutate(.obs = row_number()) %>%               
+    pivot_wider(names_from = estrato, values_from = categoria,
+                values_fill = "Total") %>%
+    dplyr::select(-.obs) %>%
+    rename(any_of(rename_estratos))                
+
+  # --- unir y ordenar ---------------------------------------------------
+  bind_rows(
+    nac    %>% ensure_dims() %>% add_constantes(),
+    estrat %>% ensure_dims() %>% add_constantes()
+  ) %>%
+    dplyr::select(all_of(orden))
+}
