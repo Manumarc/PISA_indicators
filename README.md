@@ -1,8 +1,12 @@
-# PISA_indicators
+## PISA_indicators
 
 Funciones que construyen los indicadores de aprendizaje y recursos físicos de CIMA
 
-# Calcular resultados de Medida promedio y Niveles de logros a nivel nacional y por estratos
+## CARGAR LAS FUNCIONES
+
+source(url("https://raw.githack.com/Manumarc/PISA_indicators/main/pisa_indicator.R"))
+
+## Calcular resultados de Medida promedio y Niveles de logros a nivel nacional y por estratos
 
 ```
 # Forma de cálculo individual #
@@ -105,7 +109,7 @@ gc()
 
 ```
 
-# Calcular resultados de recursos financieros a nivel nacional y por estratos
+## Calcular resultados de recursos financieros a nivel nacional y por estratos
 
 ```
 
