@@ -186,7 +186,7 @@ resultados <- future_imap(
   },
   .options = furrr_options(
     seed      = TRUE,
-    packages  = c("intsvy", "dplyr", "tidyr", "purrr", "stringr", "tibble"),
+    packages  = c("intsvy", "dplyr", "tidyr", "purrr", "stringr", "tibble", "haven"),
     scheduling = Inf     # reparto dinámico: el worker que termina agarra la siguiente base
   )
 ) %>%
@@ -246,7 +246,7 @@ resultados_rf <- future_imap(
   },
   .options = furrr_options(
     seed       = TRUE,
-    packages   = c("intsvy", "dplyr", "tidyr", "purrr", "stringr", "tibble"),
+    packages   = c("intsvy", "dplyr", "tidyr", "purrr", "stringr", "tibble", "haven"),
     scheduling = Inf     
   )
 ) %>%
