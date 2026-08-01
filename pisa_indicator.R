@@ -636,9 +636,14 @@ calcular_refis <- function(bd_datos,
     if (niv_estrat == "Estratos") paste0(" (", paste(nom_estratos, collapse = ", "), ")") else "",
     " | Indicadores: ", paste(presentes, collapse = ", "))
 
+  a_etiqueta <- function(x) {
+  if (haven::is.labelled(x)) haven::as_factor(x)
+  else as.factor(as.character(x))
+  }
+  
   # Indicadores y estratos
   datos <- bd_datos %>%
-    mutate(across(all_of(indic_prop),  ~ as.factor(as.character(.x)))) %>%
+    mutate(across(all_of(indic_prop), a_etiqueta)) %>% 
     mutate(across(all_of(c(indic_media, indic_razon)), ~ as.numeric(as.character(.x)))) %>%
     mutate(across(all_of(nom_estratos), ~ as.factor(as.character(.x))))   # estratos como grupos
   
@@ -650,8 +655,12 @@ calcular_refis <- function(bd_datos,
         !!sym(grupo)  := .data[[grupo]],
         estrato        = if (is.null(estr)) "Nacional" else estr,
         nivel_estrato  = if (is.null(estr)) NA_character_ else as.character(.data[[estr]]),
-        indicator = var, categoria = as.character(.data[[var]]),
-        estimacion = Percentage, se = Std.err., medida = "proporcion")
+        indicator = var, 
+        categoria = as.character(.data[[var]]),
+        estimacion = Percentage, 
+        se = Std.err., 
+        medida = "proporcion"
+        )
   }
   f_media <- function(var, estr = NULL) {
     d <- if (is.null(estr)) datos else filter(datos, !is.na(.data[[estr]]))
@@ -661,8 +670,12 @@ calcular_refis <- function(bd_datos,
         !!sym(grupo)  := .data[[grupo]],
         estrato        = if (is.null(estr)) "Nacional" else estr,
         nivel_estrato  = if (is.null(estr)) NA_character_ else as.character(.data[[estr]]),
-        indicator = var, categoria = NA_character_,
-        estimacion = Mean, se = `s.e.`, medida = "media")
+        indicator = var, 
+        categoria = NA_character_,
+        estimacion = Mean, 
+        se = `s.e.`, 
+        medida = "media"
+        )
   }
   f_razon <- function(var, estr = NULL) {
     d <- if (is.null(estr)) datos else filter(datos, !is.na(.data[[estr]]))
@@ -672,8 +685,12 @@ calcular_refis <- function(bd_datos,
         !!sym(grupo)  := .data[[grupo]],
         estrato        = if (is.null(estr)) "Nacional" else estr,
         nivel_estrato  = if (is.null(estr)) NA_character_ else as.character(.data[[estr]]),
-        indicator = var, categoria = NA_character_,
-        estimacion = 1 / Mean, se = `s.e.` / Mean^2, medida = "razon_inv")
+        indicator = var, 
+        categoria = NA_character_,
+        estimacion = 1/Mean, 
+        se = `s.e.`/Mean^2, 
+        medida = "razon_inv"
+        )
   }
   seguro <- function(f) possibly(f, otherwise = NULL, quiet = FALSE)
   
@@ -706,7 +723,7 @@ calcular_refis <- function(bd_datos,
       summarise(
         n_paises   = n(),
         estimacion = mean(estimacion),
-        se         = sqrt(sum(se^2)) / n(),   # SE de la media de k estimaciones indep.
+        se         = sqrt(sum(se^2))/n(),   # SE de la media de k estimaciones indep.
         .groups    = "drop"
       ) %>%
       mutate(!!sym(grupo) := etiqueta)
