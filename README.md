@@ -21,7 +21,15 @@ library(furrr)      # Permite realizar análisis paralelizado
 source(url("https://raw.githack.com/Manumarc/PISA_indicators/main/pisa_indicator.R"))
 
 ```
+## Preparación de datos
+
+Luego de descargar las bases de datos de PISA (https://www.oecd.org/en/about/programmes/pisa/pisa-data.html), es necesario preparar las bases para calcular los indicadores. Los siguientes scripts contienen la ruta de preparación:
+
+- 00_convertir_datos_a_fst.qmd: las bases se transforman a formato .fst para reducir su tamaño y poder abrirlas rápidamente.
+- 01_
+
 ## Calcular resultados de Medida promedio y Niveles de logros a nivel nacional y por estratos
+
 ```
 # Forma de cálculo individual #
 #-----------------------------#
@@ -34,7 +42,8 @@ source(url("https://raw.githack.com/Manumarc/PISA_indicators/main/pisa_indicator
         niv_estrat = "Nacional"      # Puede tomar los valores "Nacional" o "Estratos"
       )
 ```
- Si se quiere calcular los resultados de varios años al mismo tiempo, se puede utilizar el siguiente código. Las funciones a nivel nacional y por estratos consideran promedio LAC y promedio OECD para todas las áreas.
+
+Si se quiere calcular los resultados de varios años al mismo tiempo, se puede utilizar el siguiente código. Las funciones a nivel nacional y por estratos consideran promedio LAC y promedio OECD para todas las áreas.
 
 ```
 #==============================================================================#
@@ -136,7 +145,7 @@ calcular_refis(
 )
 
 ```
- Si se quiere calcular los resultados de varios años al mismo tiempo, se puede utilizar el siguiente código
+Si se quiere calcular los resultados de varios años al mismo tiempo, se puede utilizar el siguiente código
  
 ```
 #==============================================================================#
@@ -188,7 +197,7 @@ gc()
 ```
 ## Dar formato de SCL data
 
-a la base de datos resultante de PISA se le aplica la función y se obtiene el formato de base de datos de SCL data
+A la base de datos resultante de PISA se le aplica la función "pisa_to_scldata" y se obtiene el formato de base de datos de SCL data
 
 ```
 # Dar formato de scl data #
