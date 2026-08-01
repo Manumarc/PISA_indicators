@@ -26,7 +26,9 @@ source(url("https://raw.githack.com/Manumarc/PISA_indicators/main/pisa_indicator
 Luego de descargar las bases de datos de PISA (https://www.oecd.org/en/about/programmes/pisa/pisa-data.html), es necesario preparar las bases para calcular los indicadores. Los siguientes scripts contienen la ruta de preparación:
 
 - 00_convertir_datos_a_fst.qmd: las bases se transforman a formato .fst para reducir su tamaño y poder abrirlas rápidamente.
-- 01_
+- 01_integrar_bases.qmd: se integran las bases cuestionarios de estudiantes y escuela.
+- 02_pegado_escs_depuracion.qmd: se realiza el pegado de la variable ecsc_trend (tendencia comparable de 2012 en adelante) y se procede a depurar las variables.
+- 03_indicadores_v1.qmd: se procede a calcular los indicadores de aprendizaje y recursos físicos.
 
 ## Calcular resultados de Medida promedio y Niveles de logros a nivel nacional y por estratos
 
