@@ -1,0 +1,301 @@
+---
+title: "Preparación de bases PISA 2000-2022"
+author: "Manuel Marcos"
+format: html
+---
+
+```{r Configuración inicial}
+
+# Limpia el entorno de trabajo de R #
+#-----------------------------------#
+
+rm(list=ls()) 
+
+options(scipen = 999)
+# Configura las opciones globales para los chunks de código en un documento #
+#---------------------------------------------------------------------------#
+
+knitr::opts_chunk$set(echo=TRUE,      # Hace que el código del chunk se muestre en el documento final.
+                      warning=FALSE,  # Suprime la visualización de advertencias generadas en el documento final.
+                      message=FALSE)  # Evita que se muestren mensajes en el documento final.
+```
+
+```{r Librerías, message=FALSE, warning=FALSE}
+
+library(foreign)    # Importar y exportar bases de spss
+library(openxlsx)   # Facilita la lectura de archivos de Excel (".xls" y ".xlsx")
+library(fst)        # Abre archivos ".fst, que son extremadamente rápidos para guardar y cargar grandes conjuntos de datos
+library(tidyverse)  # Un conjunto de paquetes interrelacionados diseñados para análisis de datos
+library(ggplot2)    # Para crear gráficos
+library(ggtext)     # Extiende las capacidades de personalización de texto en gráficos creados con ggplot2
+library(ggpubr)     # Proporciona funciones de alto nivel para crear gráficos de publicación con ggplot2
+library(gt)         # Permite convertir data.tables en tablas con un formato bonito
+library(survey)     # Permite analizar datos provenientes de muestras complejas
+library(ggh4x)      # Permite mejorar la estética de los gráficos
+library(legendry)   # Permite crear y posicionar leyendas personalizadas en gráficos
+library(Hmisc)      # Herramientas para análisis de datos
+library(ggridges)   # Extiende ggplot2 para crear gráficos de densidad por grupos
+library(stringi)    # Permite manipulación de cadenas de texto
+library(patchwork)  # Permite combinar gráficos
+library(ggrepel)    # Permite crear etiquetas con distanciamiento automático 
+library(scales)     # Permite editar tonos, formatos de número y texto
+library(sanzo)      # Paleta de combinación de colores de Sanzo Wada
+
+``` 
+
+```{r Llamado de funciones}
+
+source(url("https://raw.githack.com/Manumarc/Resultados-ENLA/main/funciones.R"))
+
+```
+
+```{r Bases de datos}
+
+#========================================================================================================#
+# Bases de estudiante PISA 
+#========================================================================================================#
+
+pisa00_read <- read.fst("01 Bases/pisa00_read.fst") # 5 valores plausibles
+pisa03 <- read.fst("01 Bases/pisa03_pv.fst") # 5 valores plausibles
+pisa06 <- read.fst("01 Bases/pisa06_pv.fst") # 5 valores plausibles
+pisa09 <- read.fst("01 Bases/pisa09_pv.fst") # 5 valores plausibles
+pisa12 <- read.fst("01 Bases/pisa12_pv.fst") # 5 valores plausibles
+pisa15 <- read.fst("01 Bases/pisa15_pv.fst") # 10 valores plausibles
+pisa18 <- read.fst("01 Bases/pisa18_pv.fst") # 10 valores plausibles
+pisa22 <- read.fst("01 Bases/pisa22_pv.fst") # 10 valores plausibles
+
+#========================================================================================================#
+# Bases de escuelas PISA 
+#========================================================================================================#
+
+school00 <- read.fst("01 Bases/pisa00_school.fst") %>% 
+  rename(COUNTRY = country, SCHOOLID=schoolid) %>% 
+  dplyr::select(-c(cnt,subnatio))
+school03 <- read.fst("01 Bases/pisa03_school.fst") %>% 
+  dplyr::select(-c(CNT,SUBNATIO, STRATUM))
+school06 <- read.fst("01 Bases/pisa06_school.fst") %>% 
+  dplyr::select(-c(COUNTRY,SUBNATIO,OECD,STRATUM))
+school09 <- read.fst("01 Bases/pisa09_school.fst") %>% 
+  dplyr::select(-c(COUNTRY,SUBNATIO,OECD,STRATUM))
+school12 <- read.fst("01 Bases/pisa12_school.fst") %>% 
+  dplyr::select(-c(NC,SUBNATIO,OECD,STRATUM))
+school15 <- read.fst("01 Bases/pisa15_school.fst") %>% 
+  dplyr::select(-c(CNTRYID,CYC,NatCen,Region,STRATUM,SUBNATIO,OECD,ADMINMODE,LANGTEST))
+school18 <- read.fst("01 Bases/pisa18_school.fst") %>% 
+  dplyr::select(-c(CNTRYID,CYC,NatCen,Region,STRATUM,SUBNATIO,OECD,ADMINMODE,LANGTEST))
+school22 <- read.fst("01 Bases/pisa22_school.fst") %>% 
+  dplyr::select(-c(CNTRYID,CYC,NatCen,REGION,STRATUM,SUBNATIO,OECD,ADMINMODE,LANGTEST_QQQ))
+
+```
+
+```{r Países por ciclo }
+
+# PISA 2000 #
+#-----------#
+
+oecd_00 <- c(
+  "AUSTRALIA", "AUSTRIA", "BELGIUM", "CANADA", "CZECH REPUBLIC", "DENMARK", "FINLAND", "FRANCE", "GERMANY", "GREECE", "HUNGARY", "ICELAND", "IRELAND", "ITALY", "JAPAN", "KOREA, REPUBLIC OF","LUXEMBOURG", "MEXICO", "NETHERLANDS", "NEW ZEALAND", "NORWAY", "POLAND", "PORTUGAL", "SPAIN", "SWEDEN", "SWITZERLAND", "UNITED KINGDOM", "UNITED STATES"
+) 
+
+lac_00 <- c(
+  "BRAZIL", "ARGENTINA", "CHILE", "PERU", "MEXICO"
+)
+
+# PISA 2003 #
+#-----------#
+
+oecd_03 <- c(
+  "Australia", "Austria", "Belgium", "Canada", "Czech Republic", "Denmark", "Finland", "France", "Germany","Greece", "Hungary", "Iceland", "Ireland", "Italy", "Japan", "Korea", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovakia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
+) 
+
+lac_03 <- c(
+  "Brazil", "Uruguay", "Mexico"
+)
+
+# PISA 2006 #
+#-----------#
+
+oecd_06 <- c(
+  "Australia", "Austria", "Belgium", "Canada", "Czech Republic", "Denmark", "Finland", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Japan", "Korea", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
+) 
+
+lac_06 <- c(
+  "Argentina", "Brazil", "Chile", "Colombia", "Uruguay"
+)
+
+# PISA 2009 #
+#-----------#
+
+oecd_09 <- c(
+  "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
+) 
+
+lac_09 <- c(
+  "Chile", "Mexico", "Argentina", "Brazil", "Colombia", "Panama", "Peru", "Uruguay", "Costa Rica"
+)
+
+# PISA 2012 #
+#-----------#
+
+oecd_12 <- c(
+  "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
+) 
+
+lac_12 <- c(
+  "Chile", "Mexico", "Argentina", "Brazil", "Colombia", "Costa Rica", "Peru", "Uruguay"
+)
+
+# PISA 2015 #
+#-----------#
+
+oecd_15 <- c(
+  "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Latvia", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
+) 
+
+lac_15 <- c(
+  "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay"  
+)
+
+# PISA 2018 #
+#-----------#
+
+oecd_18 <- c(
+  "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
+) 
+
+lac_18 <- c(
+  "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "Panama", "Peru", "Uruguay"  
+)
+
+# PISA 2022 #
+#-----------#
+
+oecd_22 <- c(
+  "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Costa Rica", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Türkiye", "United Kingdom", "United States"
+) 
+
+lac_22 <- c(
+  "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Uruguay"  
+)
+
+pais_00 <- c(oecd_00, lac_00)
+pais_03 <- c(oecd_03, lac_03)
+pais_06 <- c(oecd_06, lac_06)
+pais_09 <- c(oecd_09, lac_09)
+pais_12 <- c(oecd_12, lac_12)
+pais_15 <- c(oecd_15, lac_15)
+pais_18 <- c(oecd_18, lac_18)
+pais_22 <- c(oecd_22, lac_22)
+
+paises_por_anio <- list(
+  "2000" = pais_00,
+  "2003" = pais_03,
+  "2006" = pais_06,
+  "2009" = pais_09,
+  "2012" = pais_12,
+  "2015" = pais_15,
+  "2018" = pais_18,
+  "2022" = pais_22
+)
+
+```
+
+```{r Función de armonización}
+
+#===============================================================#
+# Función de armonización de bases
+#===============================================================#
+
+# Función base #
+#--------------#
+armoniza_base <- function(base) {
+  
+  base %>% 
+    rename_with(toupper) %>% 
+    mutate(across(c(starts_with("PV"), starts_with("W_")),
+                  ~as.numeric(as.character(.)))) %>%
+    mutate(across(any_of("CNT"), str_trim)) %>% 
+    mutate(across(any_of("COUNTRY"), str_trim))
+  
+}
+
+# Envoltorio para reconocer data frame o lista de data frames #
+#-------------------------------------------------------------#
+
+armoniza <- function(x) {
+  if (is.data.frame(x)) {
+    armoniza_base(x)              # una sola base
+  } else if (is.list(x)) {
+    map(x, armoniza_base)         # lista de bases
+  } else {
+    stop("`x` debe ser un data frame o una lista de data frames")
+  }
+}
+
+```
+
+```{r Integración de bases}
+
+# Bases de datos de escuelas #
+#----------------------------#
+
+school_por_anio <- list(
+  "2000" = school00, 
+  "2003" = school03, 
+  "2006" = school06, 
+  "2009" = school09,
+  "2012" = school12, 
+  "2015" = school15, 
+  "2018" = school18, 
+  "2022" = school22
+)
+
+llave_school <- function(anio) {
+  anio <- as.numeric(anio)
+  if (anio < 2006)       c("COUNTRY", "SCHOOLID")
+  else if (anio < 2015)  c("CNT", "SCHOOLID")
+  else                   c("CNT", "CNTSCHID")
+}
+
+# Inicio de armonización #
+#------------------------#
+
+anios <- c(2000, 2003, 2006, 2009, 2012, 2015, 2018, 2022)
+
+lista_bases <- list(pisa00_read, pisa03, pisa06, pisa09, pisa12, pisa15, pisa18, pisa22) %>% 
+  armoniza() %>% 
+  set_names(anios) %>% 
+  imap(~ {
+    stopifnot(.y %in% names(paises_por_anio))
+    .x %>%
+      filter(.data[[if (as.numeric(.y) >= 2006) "CNT" else "COUNTRY"]] %in%
+               paises_por_anio[[.y]])
+  })
+
+# Pegado de bases escuelas
+
+bases_int <- lista_bases %>% 
+  imap(
+    ~left_join(.x, school_por_anio[[.y]], by = llave_school(.y))
+  ) %>% 
+  map(
+    ~.x %>% 
+      rename_with(toupper)
+  )
+
+```
+
+```{r Guardar bases integradas}
+
+iwalk(
+  bases_int,
+  ~write.fst(.x, paste0("01 Bases/pisa", str_sub(.y, 3, 4), "_int.fst"),
+              compress = 75)
+)
+
+```
+
+```{r}
+
+```
+
