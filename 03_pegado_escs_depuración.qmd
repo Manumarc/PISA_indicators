@@ -1,0 +1,514 @@
+---
+title: "Untitled"
+format: html
+---
+
+```{r Configuración inicial}
+
+# Limpia el entorno de trabajo de R #
+#-----------------------------------#
+
+rm(list=ls()) 
+
+options(scipen = 999)
+# Configura las opciones globales para los chunks de código en un documento #
+#---------------------------------------------------------------------------#
+
+knitr::opts_chunk$set(echo=TRUE,      # Hace que el código del chunk se muestre en el documento final.
+                      warning=FALSE,  # Suprime la visualización de advertencias generadas en el documento final.
+                      message=FALSE)  # Evita que se muestren mensajes en el documento final.
+```
+
+```{r Librerías, message=FALSE, warning=FALSE}
+
+library(foreign)    # Importar y exportar bases de spss
+library(openxlsx)   # Facilita la lectura de archivos de Excel (".xls" y ".xlsx")
+library(fst)        # Abre archivos ".fst, que son extremadamente rápidos para guardar y cargar grandes conjuntos de datos
+library(tidyverse)  # Un conjunto de paquetes interrelacionados diseñados para análisis de datos
+library(ggplot2)    # Para crear gráficos
+library(ggtext)     # Extiende las capacidades de personalización de texto en gráficos creados con ggplot2
+library(ggpubr)     # Proporciona funciones de alto nivel para crear gráficos de publicación con ggplot2
+library(gt)         # Permite convertir data.tables en tablas con un formato bonito
+library(survey)     # Permite analizar datos provenientes de muestras complejas
+library(ggh4x)      # Permite mejorar la estética de los gráficos
+library(legendry)   # Permite crear y posicionar leyendas personalizadas en gráficos
+library(Hmisc)      # Herramientas para análisis de datos
+library(ggridges)   # Extiende ggplot2 para crear gráficos de densidad por grupos
+library(stringi)    # Permite manipulación de cadenas de texto
+library(patchwork)  # Permite combinar gráficos
+library(ggrepel)    # Permite crear etiquetas con distanciamiento automático 
+library(scales)     # Permite editar tonos, formatos de número y texto
+library(sanzo)      # Paleta de combinación de colores de Sanzo Wada
+
+``` 
+
+```{r Llamado de funciones}
+
+source(url("https://raw.githack.com/Manumarc/Resultados-ENLA/main/funciones.R"))
+
+```
+
+```{r Bases de datos}
+
+#========================================================================================================#
+# Bases de estudiante PISA 
+#========================================================================================================#
+
+pisa00 <- read.fst("01 Bases/pisa00_int.fst")
+pisa03 <- read.fst("01 Bases/pisa03_int.fst")
+pisa06 <- read.fst("01 Bases/pisa06_int.fst")
+pisa09 <- read.fst("01 Bases/pisa09_int.fst")
+pisa12 <- read.fst("01 Bases/pisa12_int.fst")
+pisa15 <- read.fst("01 Bases/pisa15_int.fst")
+pisa18 <- read.fst("01 Bases/pisa18_int.fst")
+pisa22 <- read.fst("01 Bases/pisa22_int.fst")
+
+#========================================================================================================#
+# Base de ESCS de PISA
+#========================================================================================================#
+
+escs_trend <- read.csv("01 Bases/escs_trend.csv", sep = ",") %>% 
+  dplyr::select(cycle, cnt, schoolid, studentid, escs_trend) %>% 
+  rename_with(toupper)
+
+#========================================================================================================#
+# Base de diccionario 
+#========================================================================================================#
+
+dic <- tribble(
+  ~anio, ~pais,     ~sex,        ~gestion,    ~area,       ~area_rural,
+  2000,  "COUNTRY", "ST03Q01",   "SC03Q01",   "SC01Q01",   "Village (less 3 000)",
+  2003,  "COUNTRY", "ST03Q01",   "SC03Q01",   "SC01Q01",   "Village (less 3 000)",
+  2006,  "CNT",     "ST04Q01",   "SC02Q01",   "SC07Q01",   "Village",
+  2009,  "CNT",     "ST04Q01",   "SC02Q01",   "SC04Q01",   "Village",
+  2012,  "CNT",     "ST04Q01",   "SC01Q01",   "SC03Q01",   "Village",
+  2015,  "CNT",     "ST004D01T", "SC013Q01TA","SC001Q01TA","A village, hamlet or rural area (fewer than 3 000 people)",
+  2018,  "CNT",     "ST004D01T", "SC013Q01TA","SC001Q01TA","A village, hamlet or rural area (fewer than 3 000 people)",
+  2022,  "CNT",     "ST004D01T", "SC013Q01TA","SC001Q01TA","A village, hamlet or rural area (fewer than 3 000 people)"
+)
+```
+
+```{r Notas metodológicas}
+
+# Luxemburgo no tiene ESCS escalado y comparable
+# Trinidad y Tobago no tiene ESCS escalado y comparable
+
+```
+
+```{r Códigos isoalpha3}
+
+iso_paises <- data.frame(
+  nom_pais = c(
+    "ARGENTINA", "Argentina", "AUSTRALIA", "Australia", "AUSTRIA", "Austria",
+    "BELGIUM", "Belgium", "BRAZIL", "Brazil", "CANADA", "Canada",
+    "CHILE", "Chile", "Colombia", "Costa Rica", "CZECH REPUBLIC", "Czech Republic",
+    "DENMARK", "Denmark", "Dominican Republic", "El Salvador", "Estonia",
+    "FINLAND", "Finland", "FRANCE", "France", "GERMANY", "Germany",
+    "GREECE", "Greece", "Guatemala", "HUNGARY", "Hungary", "ICELAND", "Iceland",
+    "IRELAND", "Ireland", "Israel", "ITALY", "Italy", "Jamaica",
+    "JAPAN", "Japan", "KOREA, REPUBLIC OF", "Korea", "Latvia", "Lithuania",
+    "LUXEMBOURG", "Luxembourg", "MEXICO", "Mexico", "NETHERLANDS", "Netherlands",
+    "NEW ZEALAND", "New Zealand", "NORWAY", "Norway", "Panama", "Paraguay",
+    "PERU", "Peru", "POLAND", "Poland", "PORTUGAL", "Portugal",
+    "Slovak Republic", "Slovakia", "Slovenia", "SPAIN", "Spain",
+    "SWEDEN", "Sweden", "SWITZERLAND", "Switzerland", "Trinidad and Tobago",
+    "Turkey", "Türkiye", "UNITED KINGDOM", "United Kingdom",
+    "UNITED STATES", "United States", "Uruguay"
+  ),
+  isoalpha3 = c(
+    "ARG", "ARG", "AUS", "AUS", "AUT", "AUT",
+    "BEL", "BEL", "BRA", "BRA", "CAN", "CAN",
+    "CHL", "CHL", "COL", "CRI", "CZE", "CZE",
+    "DNK", "DNK", "DOM", "SLV", "EST",
+    "FIN", "FIN", "FRA", "FRA", "DEU", "DEU",
+    "GRC", "GRC", "GTM", "HUN", "HUN", "ISL", "ISL",
+    "IRL", "IRL", "ISR", "ITA", "ITA", "JAM",
+    "JPN", "JPN", "KOR", "KOR", "LVA", "LTU",
+    "LUX", "LUX", "MEX", "MEX", "NLD", "NLD",
+    "NZL", "NZL", "NOR", "NOR", "PAN", "PRY",
+    "PER", "PER", "POL", "POL", "PRT", "PRT",
+    "SVK", "SVK", "SVN", "ESP", "ESP",
+    "SWE", "SWE", "CHE", "CHE", "TTO",
+    "TUR", "TUR", "GBR", "GBR",
+    "USA", "USA", "URY"
+  )
+)
+
+```
+
+```{r Función percentil pesado}
+
+percentil_cima <- function(var, weights, percentil = "quintil", normwt = TRUE) {
+  
+  n_grupos <- c(tercil = 3, cuartil = 4, quintil = 5, decil = 10)
+  
+  if (!percentil %in% names(n_grupos)) {
+    stop("`percentil` debe ser: ", paste(names(n_grupos), collapse = ", "))
+  }
+  
+  k <- n_grupos[[percentil]]
+  probs <- seq_len(k-1)/k
+  etiquetas <- paste0("Grupo Q", seq_len(k))
+  
+  # factor vacío con los niveles correctos, para los casos degenerados
+  vacio <- factor(rep(NA_character_, length(var)),
+                  levels = etiquetas, ordered = TRUE)
+  
+  # casos utilizables: sin NA en var ni en el peso, y peso positivo
+  ok <- !is.na(var) & !is.na(weights) & weights > 0
+  
+  # sin datos suficientes o sin variabilidad -> NA en vez de error
+  if (sum(ok) < k || dplyr::n_distinct(var[ok]) < k) {
+    warning("Grupo sin datos suficientes para ", k, " grupos; se devuelve NA.",
+            call. = FALSE)
+    return(vacio)
+  }
+  
+  cortes <- Hmisc::wtd.quantile(
+    var[ok], 
+    weights = weights[ok], 
+    probs = probs,
+    na.rm = TRUE, 
+    type = '(i-1)/(n-1)', 
+    normwt = normwt
+  )
+  
+  # cortes empatados -> breaks no estrictamente crecientes -> cut() falla
+  if (any(duplicated(cortes))) {
+    warning("Cortes empatados en ", percentil, "; se devuelve NA.", call. = FALSE)
+    return(vacio)
+  }
+  
+  cut(
+    var,
+    breaks = c(-Inf, cortes, Inf),
+    labels = etiquetas,
+    right = TRUE,                               
+    ordered_result = TRUE
+  )
+  
+} 
+
+```
+
+```{r}
+
+escs_12 <- escs_trend %>% 
+  filter(CYCLE %in% 5) %>% 
+  rename(isoalpha3=CNT ,STIDSTD = STUDENTID) %>%  
+  dplyr::select(-CYCLE)
+
+escs_15 <- escs_trend %>% 
+  filter(CYCLE %in% 6) %>% 
+  rename(isoalpha3=CNT ,STIDSTD = STUDENTID) %>%  
+  dplyr::select(-CYCLE)
+
+escs_18 <- escs_trend %>% 
+  filter(CYCLE %in% 7) %>% 
+  rename(isoalpha3=CNT ,STIDSTD = STUDENTID) %>%  
+  dplyr::select(-CYCLE)
+
+```
+
+```{r Funciones para depuración}
+
+fun_acceso <- function(x) {
+  x <- as.numeric(as.character(x))
+  case_when(
+    x == 0 ~ "Sin acceso",
+    x >  0 ~ "Con acceso",
+    TRUE ~ NA_character_
+  )
+}
+
+fun_ratio <- function(num, den) {
+  
+  num <- as.numeric(as.character(num)); den <- as.numeric(as.character(den))
+  
+  case_when(
+    is.na(num) | is.na(den) ~ NA_real_,
+    den <= 0 ~ NA_real_,   # denominador inválido
+    TRUE ~ num / den
+  )
+}
+
+fun_financia <- function(gob, p2, p3, p4) {
+  
+  num <- function(z) as.numeric(as.character(z))
+  gob <- num(gob); p2 <- num(p2); p3 <- num(p3); p4 <- num(p4)
+  tot <- gob + p2 + p3 + p4
+  
+  tibble(
+    tot_fin  = tot,
+    financia = case_when(
+      gob == tot & tot != 0 ~ "Public",
+      gob == 0   & tot != 0 ~ "Private",
+      gob != 0 & gob != tot & tot != 0 ~ "Mixed",
+      TRUE ~ NA_character_
+    )
+  )
+}
+
+fun_area <- function(x, etiquetas_rural) {
+  
+  x <- str_trim(as.character(x))
+  
+  case_when(
+    is.na(x) ~ NA_character_, x %in% etiquetas_rural ~ "Rural", 
+    TRUE ~ "Urban"
+  )
+}
+
+fun_lengua <- function(x, etiquetas_test) {
+  
+  x <- str_trim(as.character(x))
+  
+  case_when(
+    is.na(x) ~ NA_character_, x %in% etiquetas_test ~ "Language of test",
+    TRUE ~ "Another language"
+  )
+}
+
+fun_gestion <- function(x, publico, privado) {
+  
+  x <- str_trim(as.character(x))
+  
+  case_when(
+    x %in% publico ~ "Public", 
+    x %in% privado ~ "Private", 
+    TRUE ~ NA_character_
+  )
+}
+
+fun_dispositivo <- function(x) {
+  
+  x <- str_trim(as.character(x))
+  
+  case_when(
+    x %in% "I do not have this subject" ~ NA_character_,
+    x %in% c(
+      "In about half of the lessons",
+      "In more than half of the lessons",
+      "In every or almost every lesson") ~ "Yes",
+    x %in% c(
+      "Never or almost never",
+      "In less than half of the lessons") ~ "No",
+    TRUE ~ NA_character_
+  )
+}
+
+fun_quintil_escs <- function(df, escs = "ESCS", grupo = "CNT") {
+  
+  df %>%
+    mutate(
+      across(all_of(escs), 
+             ~as.numeric(as.character(.x)))
+    ) %>%  
+    group_by(across(all_of(grupo))) %>%
+    mutate(
+      quintil_escs = percentil_cima(.data[[escs]], W_FSTUWT, "quintil")
+    ) %>%
+    ungroup()
+}
+
+fun_horas <- function(x) {
+  
+  x <- str_trim(as.character(x))
+  
+  case_when(
+    x == "None"                                ~ 0,
+    x == "Up to 1 hour"                        ~ 0.5,
+    x == "More than 1 hour and up to 2 hours"  ~ 1.5,
+    x == "More than 2 hours and up to 3 hours" ~ 2.5,
+    x == "More than 3 hours and up to 4 hours" ~ 3.5,
+    x == "More than 4 hours and up to 5 hours" ~ 4.5,
+    x == "More than 5 hours and up to 6 hours" ~ 5.5,
+    x == "More than 6 hours and up to 7 hours" ~ 6.5,
+    x == "More than 7 hours"                   ~ 7.5,
+    TRUE ~ NA_real_
+  )
+}
+
+```
+
+```{r}
+
+bases_dep <- list(pisa00, pisa03, pisa06, pisa09, pisa12, pisa15, pisa18, pisa22) %>% 
+  set_names(c(2000, 2003, 2006, 2009, 2012, 2015, 2018, 2022)) %>% 
+  modify_at(
+    "2000", 
+    ~.x %>%
+      mutate(lengua = fun_lengua(ST17Q01, "<Test language>"))
+  ) %>% 
+  modify_at(
+    "2003", 
+    ~.x %>%
+      mutate(
+        lengua = fun_lengua(ST16Q01, "<Test language>")
+      ) %>%
+      fun_quintil_escs(escs="ESCS", grupo="COUNTRY")               # no comparable
+  ) %>% 
+  modify_at("2006", ~ .x %>%
+              mutate(fun_financia(SC03Q01, SC03Q02, SC03Q03, SC03Q04)) %>%
+              mutate(
+                area = fun_area(SC07Q01, "Village"),
+                lengua = fun_lengua(ST12Q01, "Language of test")
+              ) %>%
+              fun_quintil_escs(escs = "ESCS", grupo = "CNT") %>%               # no comparable
+              rename(sex = ST04Q01, gestion = SC02Q01)
+  ) %>% 
+  modify_at(
+    "2009", 
+    ~.x %>%
+      mutate(
+        acceso_pc = fun_acceso(SC10Q02), # Acceso a pc
+        acceso_internet = fun_acceso(SC10Q03), # Acceso a internet 
+        comp_est = fun_ratio(SC10Q02, SC10Q01), # Ratio computadora x estudiantes
+        area = fun_area(SC04Q01, "Village"), # área geográfica
+        lengua = fun_lengua(ST19Q01, "Language of test")  # Lengua de la prueba
+      ) %>%
+      mutate(
+        fun_financia(SC03Q01, SC03Q02, SC03Q03, SC03Q04) # Tipo de financiamiento de la escuela ("pública, privada, mixta)
+      ) %>%  
+      fun_quintil_escs(escs = "ESCS", grupo = "CNT") %>% # Quintiles socioeconómicos
+      rename(sex = ST04Q01, gestion = SC02Q01)
+  ) %>% 
+  modify_at(
+    "2012", 
+    ~.x %>%
+      mutate(
+        nervios_mat_prob = case_when(
+          is.na(ST42Q05) ~ NA_character_,
+          ST42Q05 %in% c("Strongly agree", "Agree") ~ "Math nervious",
+          TRUE ~ "Not math nervious"
+        ),
+        acceso_internet = fun_acceso(SC11Q03),
+        acceso_pc = fun_acceso(SC11Q02),
+        comp_est = fun_ratio(SC11Q02, SC11Q01)
+      ) %>%
+      mutate(across(c(SCHOOLID, STIDSTD), as.numeric)) %>%
+      left_join(iso_paises, by = c("CNT" = "nom_pais")) %>%
+      left_join(escs_12,   by = c("isoalpha3", "SCHOOLID", "STIDSTD")) %>%
+      mutate(
+        area = fun_area(SC03Q01, "Village"),
+        lengua = fun_lengua(ST25Q01, "Language of the test")
+      ) %>%
+      mutate(fun_financia(SC02Q01, SC02Q02, SC02Q03, SC02Q04)) %>%
+      fun_quintil_escs(escs = "ESCS_TREND", grupo = "CNT") %>%        # comparable 2012 en adelante
+      rename(sex = ST04Q01, gestion = SC01Q01)
+  ) %>% 
+  modify_at(
+    "2015", 
+    ~.x %>%
+      mutate(
+        acceso_internet = fun_acceso(SC004Q03TA),
+        acceso_pc = fun_acceso(SC004Q02TA),
+        comp_est = fun_ratio(SC004Q02TA, SC004Q01TA),
+        SCHOOLID = as.numeric(str_sub(CNTSCHID, -5, -1)),
+        STIDSTD = as.numeric(str_sub(CNTSTUID, -5, -1)),
+        area = fun_area(SC001Q01TA,
+                        "A village, hamlet or rural area (fewer than 3 000 people)"),
+        lengua  = fun_lengua(ST022Q01TA, "Language of test"),
+        gestion = fun_gestion(SC013Q01TA,
+                              publico = "A public school",
+                              privado = "A private school")
+      ) %>%
+      left_join(iso_paises, by = c("CNT" = "nom_pais")) %>%
+      left_join(escs_15, by = c("isoalpha3", "SCHOOLID", "STIDSTD")) %>%
+      mutate(fun_financia(SC016Q01TA, SC016Q02TA, SC016Q03TA, SC016Q04TA)) %>%
+      fun_quintil_escs(escs = "ESCS_TREND", grupo = "CNT") %>%        # comparable 2012 en adelante
+      rename(sex = ST004D01T)
+  ) %>% 
+  modify_at(
+    "2018", 
+    ~.x %>%
+      mutate(
+        nervios_lang_test= case_when(
+          is.na(WB168Q03HA) ~ NA_character_,
+          WB168Q03HA %in% c("Quite a bit", "Extremely") ~ "Lang test nervious",
+          TRUE ~ "Not lang test nervious"
+        ),
+        acceso_internet = fun_acceso(SC004Q03TA),
+        acceso_pc = fun_acceso(SC004Q02TA),
+        comp_est = fun_ratio(SC004Q02TA, SC004Q01TA),
+        SCHOOLID = as.numeric(str_sub(CNTSCHID, -5, -1)),
+        STIDSTD = as.numeric(str_sub(CNTSTUID, -5, -1)),
+        gestion = fun_gestion(SC013Q01TA,
+                              publico = "A public school (Managed by a public education authority, government agency, or governing board)",
+                              privado = "A private school (Managed by a non-government org; e.g. a church, trade union, business, or other private institution.)"),
+        area = fun_area(SC001Q01TA,
+                        "A village, hamlet or rural area (fewer than 3 000 people)"),
+        lengua  = fun_lengua(ST022Q01TA, "Language of the test")
+      ) %>%
+      left_join(iso_paises, by = c("CNT" = "nom_pais")) %>%
+      left_join(escs_18,   by = c("isoalpha3", "SCHOOLID", "STIDSTD")) %>%
+      mutate(fun_financia(SC016Q01TA, SC016Q02TA, SC016Q03TA, SC016Q04TA)) %>%
+      fun_quintil_escs(escs = "ESCS_TREND", grupo = "CNT") %>%        # comparable 2012 en adelante
+      rename(sex = ST004D01T)
+  ) %>% 
+  modify_at(
+    "2022", 
+    ~.x %>%
+      mutate(
+        nervios_mat_prob = case_when(
+          is.na(ST292Q03JA) ~ NA_character_,
+          ST292Q03JA %in% c("Strongly agree", "Agree") ~ "Math nervious",
+          TRUE ~ "Not math nervious"
+        ),
+        nervios_lang_test= case_when(
+          is.na(WB168Q03HA) ~ NA_character_,
+          WB168Q03HA %in% c("Quite a bit", "Extremely") ~ "Lang test nervious",
+          TRUE ~ "Not lang test nervious"
+        ),
+        acceso_internet = fun_acceso(SC004Q03TA),
+        acceso_pc = fun_acceso(SC004Q02TA),
+        comp_est = fun_ratio(SC004Q02TA, SC004Q01TA),
+        tablet_est = fun_ratio(SC004Q08JA, SC004Q01TA),
+        gestion = fun_gestion(SC013Q01TA,
+                              publico = "A public school(This is a school managed directly or indirectly by a public education authority, government agency, or g",
+                              privado = "A private school(This is a school managed directly or indirectly by a non-government organisation; e.g. a church, trade"),
+        area = fun_area(SC001Q01TA,
+                        "A village, hamlet or rural area (fewer than 3 000 people)"),
+        lengua = fun_lengua(ST022Q01TA, "Language of the test")
+      ) %>%
+      mutate(
+        dig_dev_learning = fun_horas(ST326Q01JA),
+        dig_dev_leisure  = fun_horas(ST326Q04JA)
+      ) %>%
+      mutate(
+        dig_dev_total = case_when(
+          if_all(c(dig_dev_learning, dig_dev_leisure), is.na) ~ NA_real_,
+          TRUE ~ rowSums(across(c(dig_dev_learning, dig_dev_leisure)), na.rm = TRUE)
+        )
+      )%>% 
+      mutate(
+        dig_dev_lang = fun_dispositivo(IC173Q01JA),
+        dig_dev_math = fun_dispositivo(IC173Q02JA),
+        dig_dev_scie = fun_dispositivo(IC173Q03JA),
+        dig_dev_it   = fun_dispositivo(IC173Q04JA)
+      ) %>%
+      mutate(fun_financia(SC016Q01TA, SC016Q02TA, SC016Q03TA, SC016Q04TA)) %>%
+      fun_quintil_escs(escs = "ESCS", grupo = "CNT") %>%              # comparable 2012 en adelante
+      rename(sex = ST004D01T)
+  )
+
+```
+
+```{r}
+
+iwalk(
+  bases_dep,
+  ~write.fst(.x, paste0("01 Bases/pisa", str_sub(.y, 3, 4), "_dep.fst"),
+              compress = 75)
+)
+
+```
+
+```{r}
+
+```
+
+
+
+
+
