@@ -713,7 +713,7 @@ calcular_refis <- function(bd_datos,
   })
   
   bind_rows(
-    resultado %>% mutate(n_paises = NA_integer_),
+    resultado %>% filter(CNT %in% lac) %>% mutate(n_paises = NA_integer_),
     promedios
   ) %>%
     arrange(indicator, .data[[grupo]], estrato, nivel_estrato) %>%
