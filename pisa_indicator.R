@@ -486,7 +486,7 @@ calcular_pisa <- function(data, anio, compet, calculo, niv_estrat) {
 calcular_refis <- function(bd_datos,
                            anio        = NULL,
                            grupo       = NULL,
-                           niv_estrat  = c("Nacional", "Estratos"), 
+                           niv_estrat  = c("Nacional", "Estratos"),
                            nom_estratos = c("sex", "lengua", "quintil_escs",
                                             "financia", "area", "gestion"),
                            indic_prop  = c("acceso_pc", "acceso_internet",
@@ -497,79 +497,79 @@ calcular_refis <- function(bd_datos,
                                            "dig_dev_total", "MATHEFF", "SCIEEFF"),
                            indic_razon = c("comp_est", "tablet_est"),
                            verbose = TRUE) {
-  
+ 
   #========================================================================================================#
   # Países considerados para promedios OECD y LAC
   #========================================================================================================#
-  
+ 
   # PISA 2009 #
   #-----------#
-
+ 
   oecd_09 <- c(
     "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
   )
-
+ 
   lac_09 <- c(
     "Chile", "Mexico", "Argentina", "Brazil", "Colombia", "Panama", "Peru", "Uruguay", "Costa Rica"
   )
-
+ 
   # PISA 2012 #
   #-----------#
-
+ 
   oecd_12 <- c(
     "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
   )
-
+ 
   lac_12 <- c(
     "Chile", "Mexico", "Argentina", "Brazil", "Colombia", "Costa Rica", "Peru", "Uruguay"
   )
-
+ 
   # PISA 2015 #
   #-----------#
-
+ 
   oecd_15 <- c(
     "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Latvia", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
   )
-
+ 
   lac_15 <- c(
     "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay"
   )
-
+ 
   # PISA 2018 #
   #-----------#
-
+ 
   oecd_18 <- c(
     "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
   )
-
+ 
   lac_18 <- c(
     "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "Panama", "Peru", "Uruguay"
   )
-
+ 
   # PISA 2022 #
   #-----------#
-
+ 
   oecd_22 <- c(
     "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Costa Rica", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Türkiye", "United Kingdom", "United States"
   )
-
+ 
   lac_22 <- c(
     "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Uruguay"
   )
-
+ 
   # PISA 2025 #
   #-----------#
-
+ 
   oecd_25 <- c(
     "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Costa Rica", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Türkiye", "United Kingdom", "United States"
   ) # Actualizar
-
+ 
   lac_25 <- c(
     "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Uruguay"
   )
-
+ 
   # Actualizar
-
+ 
   if (anio == 2009) {
     oecd <- oecd_09
     lac  <- lac_09
@@ -591,13 +591,13 @@ calcular_refis <- function(bd_datos,
   }else {
     stop("No hay grupos definidos para el año ", anio)
   }
-  
+ 
   gru_paises <- list(OECD = oecd, LAC = lac)
-  
+ 
   # Inicio de los cálculos
-
+ 
   niv_estrat <- match.arg(niv_estrat)
-
+ 
   # Cambio de Country y CNT después de año 2006
   if (is.null(grupo)) {
     if (is.null(anio))
@@ -610,7 +610,7 @@ calcular_refis <- function(bd_datos,
       warning("'", grupo, "' no está en la base; uso '", alterna, "'."); grupo <- alterna
     } else stop("La base no tiene ni 'CNT' ni 'COUNTRY'.")
   }
-
+ 
   # Verifica si los indicadores existen
   no_todo_na <- function(v) v[map_lgl(v, ~ !all(is.na(bd_datos[[.x]])))]
   indic_prop  <- no_todo_na(intersect(indic_prop,  names(bd_datos)))
@@ -619,34 +619,50 @@ calcular_refis <- function(bd_datos,
   presentes <- c(indic_prop, indic_media, indic_razon)
   if (length(presentes) == 0)
     stop("Ninguno de los indicadores solicitados está disponible en la base.")
-
+ 
   # filtro de niv_estrat para hacer la diferenciación
   if (niv_estrat == "Estratos") {
     nom_estratos <- no_todo_na(intersect(nom_estratos, names(bd_datos)))
     if (length(nom_estratos) == 0)
       stop("niv_estrat='Estratos' pero ninguna variable de estrato está en la base.")
-    estratos_run <- as.list(nom_estratos)     
+    estratos_run <- as.list(nom_estratos)
   } else {
-    estratos_run <- list(NULL)                
+    estratos_run <- list(NULL)
     nom_estratos <- character(0)
   }
-
+ 
   if (verbose) message(
     "País = ", grupo, " | Nivel = ", niv_estrat,
     if (niv_estrat == "Estratos") paste0(" (", paste(nom_estratos, collapse = ", "), ")") else "",
     " | Indicadores: ", paste(presentes, collapse = ", "))
-
+ 
   a_etiqueta <- function(x) {
-  if (haven::is.labelled(x)) haven::as_factor(x)
-  else as.factor(as.character(x))
+    if (inherits(x, "haven_labelled") || haven::is.labelled(x)) {
+      haven::as_factor(x)
+    } else {
+      as.factor(as.character(x))
+    }
   }
-  
+ 
   # Indicadores y estratos
   datos <- bd_datos %>%
-    mutate(across(all_of(indic_prop), a_etiqueta)) %>% 
+    mutate(across(all_of(indic_prop), a_etiqueta)) %>%
     mutate(across(all_of(c(indic_media, indic_razon)), ~ as.numeric(as.character(.x)))) %>%
     mutate(across(all_of(nom_estratos), ~ as.factor(as.character(.x))))   # estratos como grupos
-  
+ 
+  # Aviso: indicadores de proporción que llegaron SIN etiquetar (niveles puramente numéricos).
+  # No corta la ejecución; solo señala que esa variable saldrá con categorías tipo "1"/"2".
+  if (verbose) {
+    sin_etiqueta <- indic_prop[map_lgl(indic_prop, function(v) {
+      lv <- levels(datos[[v]])
+      length(lv) > 0 && all(grepl("^[0-9]+$", lv))
+    })]
+    if (length(sin_etiqueta))
+      warning("Indicador(es) de proporción sin etiquetas (categorías numéricas): ",
+              paste(sin_etiqueta, collapse = ", "),
+              ". Revisa el etiquetado aguas arriba (as_factor / factor(labels=...)).")
+  }
+ 
   # Cálculos de resultados
   f_prop <- function(var, estr = NULL) {
     d <- if (is.null(estr)) datos else filter(datos, !is.na(.data[[estr]])) # Filtro de missing
@@ -655,10 +671,10 @@ calcular_refis <- function(bd_datos,
         !!sym(grupo)  := .data[[grupo]],
         estrato        = if (is.null(estr)) "Nacional" else estr,
         nivel_estrato  = if (is.null(estr)) NA_character_ else as.character(.data[[estr]]),
-        indicator = var, 
+        indicator = var,
         categoria = as.character(.data[[var]]),
-        estimacion = Percentage, 
-        se = Std.err., 
+        estimacion = Percentage,
+        se = Std.err.,
         medida = "proporcion"
         )
   }
@@ -670,10 +686,10 @@ calcular_refis <- function(bd_datos,
         !!sym(grupo)  := .data[[grupo]],
         estrato        = if (is.null(estr)) "Nacional" else estr,
         nivel_estrato  = if (is.null(estr)) NA_character_ else as.character(.data[[estr]]),
-        indicator = var, 
+        indicator = var,
         categoria = NA_character_,
-        estimacion = Mean, 
-        se = `s.e.`, 
+        estimacion = Mean,
+        se = `s.e.`,
         medida = "media"
         )
   }
@@ -685,35 +701,35 @@ calcular_refis <- function(bd_datos,
         !!sym(grupo)  := .data[[grupo]],
         estrato        = if (is.null(estr)) "Nacional" else estr,
         nivel_estrato  = if (is.null(estr)) NA_character_ else as.character(.data[[estr]]),
-        indicator = var, 
+        indicator = var,
         categoria = NA_character_,
-        estimacion = 1/Mean, 
-        se = `s.e.`/Mean^2, 
+        estimacion = 1/Mean,
+        se = `s.e.`/Mean^2,
         medida = "razon_inv"
         )
   }
   seguro <- function(f) possibly(f, otherwise = NULL, quiet = FALSE)
-  
-
+ 
+ 
   cruzar <- function(indics, fn) {
     seg <- seguro(fn)
     res <- list()
     for (v in indics) for (e in estratos_run) res <- c(res, list(seg(v, e)))
     res
   }
-
+ 
   resultado <- bind_rows(
     cruzar(indic_prop,  f_prop),
     cruzar(indic_media, f_media),
     cruzar(indic_razon, f_razon)
   )
-
+ 
   if (verbose) {
     fallidos <- setdiff(presentes, unique(resultado$indicator))
     if (length(fallidos))
       warning("Presentes pero sin resultado: ", paste(fallidos, collapse = ", "))
   }
-  
+ 
   # Promedios OECD y LAC: media simple entre países
   promedios <- imap_dfr(gru_paises, function(paises, etiqueta) {
     resultado %>%
@@ -728,15 +744,15 @@ calcular_refis <- function(bd_datos,
       ) %>%
       mutate(!!sym(grupo) := etiqueta)
   })
-  
+ 
   bind_rows(
-    resultado %>% filter(CNT %in% lac) %>% mutate(n_paises = NA_integer_),
+    resultado %>% filter(.data[[grupo]] %in% lac) %>% mutate(n_paises = NA_integer_),
     promedios
   ) %>%
     arrange(indicator, .data[[grupo]], estrato, nivel_estrato) %>%
     mutate(year = anio) %>%
-    rename(pais = CNT)
-  
+    rename(pais = !!sym(grupo)) 
+    
 }
 
 #############################################
