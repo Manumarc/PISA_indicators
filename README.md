@@ -133,7 +133,7 @@ gc()
 
 ```
 
-## Calcular resultados de recursos financieros a nivel nacional y por estratos
+## Calcular resultados de recursos físicos a nivel nacional y por estratos
 
 ```
 
