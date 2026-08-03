@@ -674,7 +674,7 @@ calcular_refis <- function(bd_datos,
         nivel_estrato  = if (is.null(estr)) NA_character_ else as.character(.data[[estr]]),
         indicator = var,
         categoria = as.character(.data[[var]]),
-        estimacion = Percentage,
+        valor = Percentage,
         se = Std.err.,
         medida = "proporcion"
         )
@@ -690,7 +690,7 @@ calcular_refis <- function(bd_datos,
         nivel_estrato  = if (is.null(estr)) NA_character_ else as.character(.data[[estr]]),
         indicator = var,
         categoria = NA_character_,
-        estimacion = Mean,
+        valor = Mean,
         se = `s.e.`,
         medida = "media"
         )
@@ -706,7 +706,7 @@ calcular_refis <- function(bd_datos,
         nivel_estrato  = if (is.null(estr)) NA_character_ else as.character(.data[[estr]]),
         indicator = var,
         categoria = NA_character_,
-        estimacion = 1/Mean,
+        valor = 1/Mean,
         se = `s.e.`/Mean^2,
         medida = "razon_inv"
         )
@@ -737,13 +737,13 @@ calcular_refis <- function(bd_datos,
   # Promedios OECD y LAC: media simple entre países
   promedios <- imap_dfr(gru_paises, function(paises, etiqueta) {
     resultado %>%
-      filter(.data[[grupo]] %in% paises, !is.na(estimacion), !is.na(se)) %>%
+      filter(.data[[grupo]] %in% paises, !is.na(valor), !is.na(se)) %>%
       group_by(across(all_of(
         c("estrato", "nivel_estrato", "indicator", "categoria", "medida")))) %>%
       summarise(
         n_paises   = n(),
-        estimacion = mean(estimacion),
-        se         = sqrt(sum(se^2))/n(),   # SE de la media de k estimaciones indep.
+        valor = mean(valor),
+        se         = sqrt(sum(se^2))/n(),   # SE de la media de k valores indep.
         .groups    = "drop"
       ) %>%
       mutate(!!sym(grupo) := etiqueta)
