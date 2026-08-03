@@ -186,7 +186,7 @@ resultados <- future_imap(
   },
   .options = furrr_options(
     seed      = TRUE,
-    packages  = c("intsvy", "dplyr", "tidyr", "purrr", "stringr", "tibble", "haven"),
+    packages  = c("intsvy", "dplyr", "tidyr", "purrr", "stringr", "tibble","haven"),
     scheduling = Inf     # reparto dinámico: el worker que termina agarra la siguiente base
   )
 ) %>%
@@ -219,7 +219,7 @@ lista_bases_rf <- list(pisa09, pisa12, pisa15, pisa18, pisa22) %>%
 # Paralelización
 #==============================================================================#
 
-options(future.globals.maxSize = 3 * 1024^3)
+options(future.globals.maxSize = 3*1024^3)
 plan(multisession, workers = 2)
 
 resultados_rf <- future_imap(
@@ -236,7 +236,7 @@ resultados_rf <- future_imap(
           bd_datos   = base,
           anio       = anio,
           niv_estrat = niv_estrat,
-          verbose    = FALSE        
+          verbose    = TRUE        
         )
         if (is.null(res)) return(NULL)
         res 
@@ -266,17 +266,4 @@ write.xlsx(resultados_rf, file = "01 Bases/bd_rf_2009_2022.xlsx")
 ```{r}
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -56,7 +56,6 @@ pisa22 <- read.spss("01 Bases/PISA2022_pv.sav", to.data.frame = T)
 # Cuestionario a estudiantes 
 #========================================================================================================#
 
-
 school00 <- read.spss("01 Bases/PISA2000_school.sav", to.data.frame = T) 
 school03 <- read.spss("01 Bases/PISA2003_school.sav", to.data.frame = T) 
 school06 <- read.spss("01 Bases/PISA2006_school.sav", to.data.frame = T) 

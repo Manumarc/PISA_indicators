@@ -1,0 +1,80 @@
+---
+title: "Untitled"
+format: html
+---
+
+```{r Configuración inicial}
+
+# Limpia el entorno de trabajo de R #
+#-----------------------------------#
+
+rm(list=ls()) 
+
+options(scipen = 999)
+# Configura las opciones globales para los chunks de código en un documento #
+#---------------------------------------------------------------------------#
+
+knitr::opts_chunk$set(echo=TRUE,      # Hace que el código del chunk se muestre en el documento final.
+                      warning=FALSE,  # Suprime la visualización de advertencias generadas en el documento final.
+                      message=FALSE)  # Evita que se muestren mensajes en el documento final.
+```
+
+```{r Librerías, message=FALSE, warning=FALSE}
+
+library(foreign)     # Importar y exportar bases de spss
+library(openxlsx)    # Facilita la lectura de archivos de Excel (".xls" y ".xlsx")
+library(fst)         # Abre archivos ".fst, que son extremadamente rápidos para guardar y cargar grandes conjuntos de datos
+library(tidyverse)   # Un conjunto de paquetes interrelacionados diseñados para análisis de datos
+library(ggplot2)     # Para crear gráficos
+library(ggtext)      # Extiende las capacidades de personalización de texto en gráficos creados con ggplot2
+library(ggpubr)      # Proporciona funciones de alto nivel para crear gráficos de publicación con ggplot2
+library(gt)          # Permite convertir data.tables en tablas con un formato bonito
+library(survey)      # Permite analizar datos provenientes de muestras complejas
+library(ggh4x)       # Permite mejorar la estética de los gráficos
+library(legendry)    # Permite crear y posicionar leyendas personalizadas en gráficos
+library(Hmisc)       # Herramientas para análisis de datos
+library(ggridges)    # Extiende ggplot2 para crear gráficos de densidad por grupos
+library(stringi)     # Permite manipulación de cadenas de texto
+library(patchwork)   # Permite combinar gráficos
+library(ggrepel)     # Permite crear etiquetas con distanciamiento automático 
+library(scales)      # Permite editar tonos, formatos de número y texto
+library(sanzo)       # Paleta de combinación de colores de Sanzo Wada
+library(intsvy)     # Permite analizar los datos de PISA y otras International Large Scale Assessments
+library(furrr)      # Permite realizar análisis paralelizado
+library(countrycode) # Permite extraer nombres y códigos de países
+
+``` 
+
+```{r Llamado de funciones}
+
+source(url("https://raw.githack.com/Manumarc/Resultados-ENLA/main/funciones.R"))
+source(url("https://raw.githack.com/Manumarc/PISA_indicators/main/pisa_indicator.R"))
+
+```
+
+```{r}
+
+bd_apr <- read.xlsx("01 Bases/bd_logro_2000_2022.xlsx")
+bd_rf <- read.xlsx("01 Bases/bd_rf_2009_2022.xlsx")
+
+```
+
+```{r}
+
+bd01 <- pisa_to_scldata(bd_apr, "Aprendizaje")
+
+bd02 <- pisa_to_scldata(bd_rf, "Recursos")
+
+bd_rerfis <- rbind(bd01,bd02)
+
+```
+
+```{r}
+
+```
+
+
+
+
+
+
