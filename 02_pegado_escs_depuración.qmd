@@ -60,6 +60,7 @@ pisa06 <- read.fst("01 Bases/pisa06_int.fst")
 pisa09 <- read.fst("01 Bases/pisa09_int.fst")
 pisa12 <- read.fst("01 Bases/pisa12_int.fst")
 pisa15 <- read.fst("01 Bases/pisa15_int.fst")
+pisa17 <- read.fst("01 Bases/pisa17_int.fst")
 pisa18 <- read.fst("01 Bases/pisa18_int.fst")
 pisa22 <- read.fst("01 Bases/pisa22_int.fst")
 
@@ -83,6 +84,7 @@ dic <- tribble(
   2009,  "CNT",     "ST04Q01",   "SC02Q01",   "SC04Q01",   "Village",
   2012,  "CNT",     "ST04Q01",   "SC01Q01",   "SC03Q01",   "Village",
   2015,  "CNT",     "ST004D01T", "SC013Q01TA","SC001Q01TA","A village, hamlet or rural area (fewer than 3 000 people)",
+  2017,  "CNT",     "ST004D01T", "SC006Q01TA","SC001Q01TA","A village, hamlet or rural area (fewer than 3 000 people)",
   2018,  "CNT",     "ST004D01T", "SC013Q01TA","SC001Q01TA","A village, hamlet or rural area (fewer than 3 000 people)",
   2022,  "CNT",     "ST004D01T", "SC013Q01TA","SC001Q01TA","A village, hamlet or rural area (fewer than 3 000 people)"
 )
@@ -92,6 +94,7 @@ dic <- tribble(
 
 # Luxemburgo no tiene ESCS escalado y comparable
 # Trinidad y Tobago no tiene ESCS escalado y comparable
+# Países de PISA-D no tienen ESCS comparable para 2017, sí para 2022 los que participaron
 
 ```
 
@@ -113,7 +116,7 @@ iso_paises <- data.frame(
     "Slovak Republic", "Slovakia", "Slovenia", "SPAIN", "Spain",
     "SWEDEN", "Sweden", "SWITZERLAND", "Switzerland", "Trinidad and Tobago",
     "Turkey", "Türkiye", "UNITED KINGDOM", "United Kingdom",
-    "UNITED STATES", "United States", "Uruguay"
+    "UNITED STATES", "United States", "Uruguay", "Honduras","Ecuador"
   ),
   isoalpha3 = c(
     "ARG", "ARG", "AUS", "AUS", "AUT", "AUT",
@@ -130,7 +133,7 @@ iso_paises <- data.frame(
     "SVK", "SVK", "SVN", "ESP", "ESP",
     "SWE", "SWE", "CHE", "CHE", "TTO",
     "TUR", "TUR", "GBR", "GBR",
-    "USA", "USA", "URY"
+    "USA", "USA", "URY","HND","ECU"
   )
 )
 
@@ -333,29 +336,41 @@ fun_horas <- function(x) {
 
 ```{r}
 
-bases_dep <- list(pisa00, pisa03, pisa06, pisa09, pisa12, pisa15, pisa18, pisa22) %>% 
-  set_names(c(2000, 2003, 2006, 2009, 2012, 2015, 2018, 2022)) %>% 
+bases_dep <- list(pisa00, pisa03, pisa06, pisa09, pisa12, pisa15, pisa17, pisa18, pisa22) %>% 
+  set_names(c(2000, 2003, 2006, 2009, 2012, 2015, 2017, 2018, 2022)) %>% 
   modify_at(
     "2000", 
     ~.x %>%
-      mutate(lengua = fun_lengua(ST17Q01, "<Test language>"))
+      mutate(
+        lengua = fun_lengua(ST17Q01, "<Test language>"),
+        area = fun_area(SC01Q01, "Village (less 3 000)")
+      ) %>% 
+      mutate(fun_financia(SC04Q01,SC04Q02,SC04Q03,SC04Q04)) %>%  # Tipo de financiamiento de la escuela ("pública, privada, mixta)
+      rename(
+        gestion = SC03Q01, sex = ST03Q01
+      )
   ) %>% 
   modify_at(
     "2003", 
     ~.x %>%
       mutate(
-        lengua = fun_lengua(ST16Q01, "<Test language>")
+        lengua = fun_lengua(ST16Q01, "<Test language>"),
+        area = fun_area(SC01Q01, "Village (less 3 000)")
       ) %>%
-      fun_quintil_escs(escs="ESCS", grupo="COUNTRY")               # no comparable
+      fun_quintil_escs(escs="ESCS", grupo="COUNTRY") %>%   # no comparable
+      mutate(fun_financia(SC04Q01,SC04Q02,SC04Q03,SC04Q04)) %>% # Tipo de financiamiento de la escuela ("pública, privada, mixta)
+      rename(sex = ST03Q01, gestion = SC03Q01)
   ) %>% 
-  modify_at("2006", ~ .x %>%
-              mutate(fun_financia(SC03Q01, SC03Q02, SC03Q03, SC03Q04)) %>%
-              mutate(
-                area = fun_area(SC07Q01, "Village"),
-                lengua = fun_lengua(ST12Q01, "Language of test")
-              ) %>%
-              fun_quintil_escs(escs = "ESCS", grupo = "CNT") %>%               # no comparable
-              rename(sex = ST04Q01, gestion = SC02Q01)
+  modify_at(
+    "2006", 
+    ~.x %>%
+      mutate(
+        fun_financia(SC03Q01, SC03Q02, SC03Q03, SC03Q04),
+        area = fun_area(SC07Q01, "Village"),
+        lengua = fun_lengua(ST12Q01, "Language of test")
+      ) %>%
+      fun_quintil_escs(escs="ESCS", grupo="COUNTRY") %>%   # no comparable
+      rename(sex = ST04Q01, gestion = SC02Q01)
   ) %>% 
   modify_at(
     "2009", 
@@ -367,10 +382,8 @@ bases_dep <- list(pisa00, pisa03, pisa06, pisa09, pisa12, pisa15, pisa18, pisa22
         area = fun_area(SC04Q01, "Village"), # área geográfica
         lengua = fun_lengua(ST19Q01, "Language of test")  # Lengua de la prueba
       ) %>%
-      mutate(
-        fun_financia(SC03Q01, SC03Q02, SC03Q03, SC03Q04) # Tipo de financiamiento de la escuela ("pública, privada, mixta)
-      ) %>%  
-      fun_quintil_escs(escs = "ESCS", grupo = "CNT") %>% # Quintiles socioeconómicos
+      fun_quintil_escs(escs = "ESCS", grupo = "CNT") %>%  # Quintiles socioeconómicos
+      mutate(fun_financia(SC03Q01, SC03Q02, SC03Q03, SC03Q04)) %>%  # Tipo de financiamiento de la escuela ("pública, privada, mixta)
       rename(sex = ST04Q01, gestion = SC02Q01)
   ) %>% 
   modify_at(
@@ -393,8 +406,8 @@ bases_dep <- list(pisa00, pisa03, pisa06, pisa09, pisa12, pisa15, pisa18, pisa22
         area = fun_area(SC03Q01, "Village"),
         lengua = fun_lengua(ST25Q01, "Language of the test")
       ) %>%
-      mutate(fun_financia(SC02Q01, SC02Q02, SC02Q03, SC02Q04)) %>%
-      fun_quintil_escs(escs = "ESCS_TREND", grupo = "CNT") %>%        # comparable 2012 en adelante
+      mutate(fun_financia(SC02Q01, SC02Q02, SC02Q03, SC02Q04)) %>% 
+      fun_quintil_escs(escs = "ESCS_TREND", grupo = "CNT")   %>%      # comparable 2012 en adelante
       rename(sex = ST04Q01, gestion = SC01Q01)
   ) %>% 
   modify_at(
@@ -415,8 +428,23 @@ bases_dep <- list(pisa00, pisa03, pisa06, pisa09, pisa12, pisa15, pisa18, pisa22
       ) %>%
       left_join(iso_paises, by = c("CNT" = "nom_pais")) %>%
       left_join(escs_15, by = c("isoalpha3", "SCHOOLID", "STIDSTD")) %>%
-      mutate(fun_financia(SC016Q01TA, SC016Q02TA, SC016Q03TA, SC016Q04TA)) %>%
-      fun_quintil_escs(escs = "ESCS_TREND", grupo = "CNT") %>%        # comparable 2012 en adelante
+      mutate(fun_financia(SC016Q01TA, SC016Q02TA, SC016Q03TA, SC016Q04TA)) %>% 
+      fun_quintil_escs(escs = "ESCS_TREND", grupo = "CNT")   %>%     # comparable 2012 en adelante
+      rename(sex = ST004D01T)
+  ) %>% 
+  modify_at(
+    "2017",
+    ~.x %>% 
+      mutate(
+        area = fun_area(SC001Q01TA,
+                        "A village, hamlet or rural area (fewer than 3 000 people)"),
+        lengua  = fun_lengua(ST021Q01TA, "Language of test"),
+        gestion = fun_gestion(SC006Q01TA,
+                              publico = "A public school",
+                              privado = "A private school")
+      ) %>% 
+      mutate(fun_financia(SC008Q01TA,SC008Q02TA,SC008Q03TA,SC008Q04TA)) %>% 
+      fun_quintil_escs(escs = "ESCS15", grupo = "CNT") %>%      # No comparable en tendencia
       rename(sex = ST004D01T)
   ) %>% 
   modify_at(
@@ -442,9 +470,9 @@ bases_dep <- list(pisa00, pisa03, pisa06, pisa09, pisa12, pisa15, pisa18, pisa22
       ) %>%
       left_join(iso_paises, by = c("CNT" = "nom_pais")) %>%
       left_join(escs_18,   by = c("isoalpha3", "SCHOOLID", "STIDSTD")) %>%
-      mutate(fun_financia(SC016Q01TA, SC016Q02TA, SC016Q03TA, SC016Q04TA)) %>%
-      fun_quintil_escs(escs = "ESCS_TREND", grupo = "CNT") %>%        # comparable 2012 en adelante
-      rename(sex = ST004D01T)
+      mutate(fun_financia(SC016Q01TA, SC016Q02TA, SC016Q03TA, SC016Q04TA)) %>% 
+      fun_quintil_escs(escs = "ESCS_TREND", grupo = "CNT") %>% 
+      rename(sex = ST004D01T) 
   ) %>% 
   modify_at(
     "2022", 
@@ -487,8 +515,8 @@ bases_dep <- list(pisa00, pisa03, pisa06, pisa09, pisa12, pisa15, pisa18, pisa22
         dig_dev_scie = fun_dispositivo(IC173Q03JA),
         dig_dev_it   = fun_dispositivo(IC173Q04JA)
       ) %>%
-      mutate(fun_financia(SC016Q01TA, SC016Q02TA, SC016Q03TA, SC016Q04TA)) %>%
-      fun_quintil_escs(escs = "ESCS", grupo = "CNT") %>%              # comparable 2012 en adelante
+      mutate(fun_financia(SC016Q01TA, SC016Q02TA, SC016Q03TA, SC016Q04TA)) %>% 
+      fun_quintil_escs(escs = "ESCS", grupo = "CNT") %>% 
       rename(sex = ST004D01T)
   )
 
@@ -505,6 +533,7 @@ iwalk(
 ```
 
 ```{r}
+
 
 ```
 

@@ -61,6 +61,7 @@ pisa06 <- read.fst("01 Bases/pisa06_pv.fst") # 5 valores plausibles
 pisa09 <- read.fst("01 Bases/pisa09_pv.fst") # 5 valores plausibles
 pisa12 <- read.fst("01 Bases/pisa12_pv.fst") # 5 valores plausibles
 pisa15 <- read.fst("01 Bases/pisa15_pv.fst") # 10 valores plausibles
+pisa17 <- read.fst("01 Bases/pisa17_pv.fst") # 10 valores plausibles
 pisa18 <- read.fst("01 Bases/pisa18_pv.fst") # 10 valores plausibles
 pisa22 <- read.fst("01 Bases/pisa22_pv.fst") # 10 valores plausibles
 
@@ -81,6 +82,8 @@ school12 <- read.fst("01 Bases/pisa12_school.fst") %>%
   dplyr::select(-c(NC,SUBNATIO,OECD,STRATUM))
 school15 <- read.fst("01 Bases/pisa15_school.fst") %>% 
   dplyr::select(-c(CNTRYID,CYC,NatCen,Region,STRATUM,SUBNATIO,OECD,ADMINMODE,LANGTEST))
+school17 <- read.fst("01 Bases/pisa17_school.fst") %>% 
+  dplyr::select(-c(CNTRYID,CYC,NatCen,STRATUM,FUNDINGSTR,OECD,ADMINMODE,LANGTEST))
 school18 <- read.fst("01 Bases/pisa18_school.fst") %>% 
   dplyr::select(-c(CNTRYID,CYC,NatCen,Region,STRATUM,SUBNATIO,OECD,ADMINMODE,LANGTEST))
 school22 <- read.fst("01 Bases/pisa22_school.fst") %>% 
@@ -88,7 +91,52 @@ school22 <- read.fst("01 Bases/pisa22_school.fst") %>%
 
 ```
 
-```{r Países por ciclo }
+```{r}
+
+# pisa17_lac <- pisa17 %>% 
+#   filter(CNT %in% c("Ecuador","Guatemala","Honduras","Paraguay")) %>% 
+#   mutate(BELONG = as.factor(as.character(BELONG))) %>% 
+#   rename(
+#     hisei = HISEI
+#   )
+# 
+# comunes <- intersect(names(pisa15), names(pisa17_lac))   # 171
+# 
+# # Limpias etiquetas solo en las comunes, pero te quedas con todo pisa15
+# db1c <- pisa15 %>% 
+#   mutate(across(all_of(comunes), haven::zap_labels))
+# 
+# db2c <- pisa17_lac %>% 
+#   mutate(across(all_of(comunes), haven::zap_labels))
+# 
+# # Ahora sí, unes todo. pisa15_int tendrá TODAS las columnas de pisa15
+# # más las columnas extra que tenga pisa17_lac.
+# pisa15_int <- bind_rows(db1c, db2c)
+# 
+# #===================================================================#
+# # Directores
+# #===================================================================#
+# 
+# pisa17_sch_lac <- school17 %>% 
+#   filter(CNT %in% c("Ecuador","Guatemala","Honduras","Paraguay"))
+# 
+# comunes_sch <- intersect(names(school15), names(pisa17_sch_lac))
+# 
+# # Limpias etiquetas solo en las comunes, pero te quedas con todo pisa15
+# db1sch <- school15 %>% 
+#   mutate(across(all_of(comunes_sch), haven::zap_labels))
+# 
+# db2sch <- pisa17_sch_lac %>% 
+#   mutate(across(all_of(comunes_sch), haven::zap_labels))
+# 
+# school15_int <- bind_rows(db1sch, db2sch)
+# 
+# 
+# table(pisa15_int$his)
+
+```
+
+```{r Países por ciclo}
 
 # PISA 2000 #
 #-----------#
@@ -153,8 +201,15 @@ oecd_15 <- c(
 ) 
 
 lac_15 <- c(
-  "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay"  
+  "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay"
 )
+
+#PISA 2017 #
+#----------#
+
+oecd_17 <- NA
+
+lac_17 <- c("Ecuador","Guatemala","Honduras","Paraguay")
 
 # PISA 2018 #
 #-----------#
@@ -184,6 +239,7 @@ pais_06 <- c(oecd_06, lac_06)
 pais_09 <- c(oecd_09, lac_09)
 pais_12 <- c(oecd_12, lac_12)
 pais_15 <- c(oecd_15, lac_15)
+pais_17 <- c(oecd_17, lac_17)
 pais_18 <- c(oecd_18, lac_18)
 pais_22 <- c(oecd_22, lac_22)
 
@@ -194,6 +250,7 @@ paises_por_anio <- list(
   "2009" = pais_09,
   "2012" = pais_12,
   "2015" = pais_15,
+  "2017" = pais_17,
   "2018" = pais_18,
   "2022" = pais_22
 )
@@ -245,7 +302,8 @@ school_por_anio <- list(
   "2006" = school06, 
   "2009" = school09,
   "2012" = school12, 
-  "2015" = school15, 
+  "2015" = school15,
+  "2017" = school17,
   "2018" = school18, 
   "2022" = school22
 )
@@ -260,9 +318,9 @@ llave_school <- function(anio) {
 # Inicio de armonización #
 #------------------------#
 
-anios <- c(2000, 2003, 2006, 2009, 2012, 2015, 2018, 2022)
+anios <- c(2000, 2003, 2006, 2009, 2012, 2015, 2017, 2018, 2022)
 
-lista_bases <- list(pisa00_read, pisa03, pisa06, pisa09, pisa12, pisa15, pisa18, pisa22) %>% 
+lista_bases <- list(pisa00_read, pisa03, pisa06, pisa09, pisa12, pisa15, pisa17, pisa18, pisa22) %>% 
   armoniza() %>% 
   set_names(anios) %>% 
   imap(~ {

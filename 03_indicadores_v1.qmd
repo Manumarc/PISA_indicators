@@ -64,6 +64,7 @@ pisa06 <- read.fst("01 Bases/pisa06_dep.fst") # 5 valores plausibles
 pisa09 <- read.fst("01 Bases/pisa09_dep.fst") # 5 valores plausibles
 pisa12 <- read.fst("01 Bases/pisa12_dep.fst") # 5 valores plausibles
 pisa15 <- read.fst("01 Bases/pisa15_dep.fst") # 10 valores plausibles
+pisa17 <- read.fst("01 Bases/pisa17_dep.fst") # 10 valores plausibles
 pisa18 <- read.fst("01 Bases/pisa18_dep.fst") # 10 valores plausibles
 pisa22 <- read.fst("01 Bases/pisa22_dep.fst") # 10 valores plausibles
 
@@ -80,7 +81,7 @@ pisa22 <- read.fst("01 Bases/pisa22_dep.fst") # 10 valores plausibles
 # PISA 2000: Los países de Argentina, Chile y Perú terminaron la aplicación de la prueba en 2002, no obstante forma parte de los resultados oficiales.
 # PISA 2006: Estados Unidos no reporta resultados para Lectura porque los datos fueron considerados inválidos debido a errores de impresión en los cuadernillos de preguntas. 
 # PISA 2009: Costa Rica realizó la aplicación de la prueba en 2010, no obstante forma parte de los resultados oficiales. El territorio de "Miranda" de Venezuela participó en esta edición.
-# PISA 2022: Paraguay y Guatemala realizaron la aplicación de la prueba en 2021 (PISA-D), no obstante forma parte de los resultados oficiales.
+# PISA 2017: Paraguay, Honduras, Ecuador y Guatemala realizaron la aplicación de la prueba en 2017 (PISA-D), no obstante forma parte de los resultados oficiales para el año 2015.
 
 # Sobre el cálculo de promedios, el reporte de resultados de PISA señala que el promedio de OECD se calcula como la media aritmética simple de los valores estimados para los países. Para el caso del error estandar, este se calcula como un promedio no ponderado de estimadores independientes que es la raíz cuadrada de la sumatoria de los errores estandar al cuadrado, todo entre el número de países considerados.
 
@@ -110,16 +111,41 @@ pisa22 <- read.fst("01 Bases/pisa22_dep.fst") # 10 valores plausibles
 
 ```
 
+```{r Unificar pisa17 con pisa15}
+
+pisa17_lac <- pisa17 %>%
+  filter(CNT %in% c("Ecuador","Guatemala","Honduras","Paraguay")) %>%
+  mutate(BELONG = as.factor(as.character(BELONG))) %>%
+  rename(
+    hisei = HISEI
+  )
+
+# Variables comunes
+
+comunes <- intersect(names(pisa15), names(pisa17_lac))   # 171
+
+db1c <- pisa15 %>%
+  mutate(across(all_of(comunes), haven::zap_labels))
+
+db2c <- pisa17_lac %>%
+  mutate(across(all_of(comunes), haven::zap_labels))
+
+# Unir
+
+pisa15_int <- bind_rows(db1c, db2c)
+
+```
+
 ```{r Cálculo de MP + niv. logro}
 
 #==============================================================================#
 # Preparación de bases de datos 2000-2022
 #==============================================================================#
 
-lista_bases <- list(pisa00, pisa03, pisa06, pisa09, pisa12, pisa15, pisa18, pisa22) %>% 
+lista_bases <- list(pisa00, pisa03, pisa06, pisa09, pisa12, pisa15_int, pisa18, pisa22) %>% 
   set_names(c(2000, 2003, 2006, 2009, 2012, 2015, 2018, 2022)) 
 
-vars_fijas <- c("CNT", "COUNTRY", "CNTSCHID", "CNTSTUID", "ESCS",
+vars_fijas <- c("CNT", "COUNTRY", "CNTSCHID", "CNTSTUID",
                 "sex", "lengua", "quintil_escs", "financia", "area", "gestion")
 
 lista_bases_v2 <- lista_bases %>%
@@ -212,7 +238,7 @@ write.xlsx(resultados, file = "01 Bases/bd_logro_2000_2022.xlsx")
 # Bases para refis (2009-2022)
 #==============================================================================#
 
-lista_bases_rf <- list(pisa09, pisa12, pisa15, pisa18, pisa22) %>%
+lista_bases_rf <- list(pisa09, pisa12, pisa15_int, pisa18, pisa22) %>%
   set_names(c(2009, 2012, 2015, 2018, 2022))
 
 #==============================================================================#
