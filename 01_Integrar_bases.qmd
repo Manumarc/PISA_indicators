@@ -1,5 +1,5 @@
 ---
-title: "Preparación de bases PISA 2000-2022"
+title: "Integración de bases PISA 2000-2022"
 author: "Manuel Marcos"
 format: html
 ---
@@ -88,51 +88,6 @@ school18 <- read.fst("01 Bases/pisa18_school.fst") %>%
   dplyr::select(-c(CNTRYID,CYC,NatCen,Region,STRATUM,SUBNATIO,OECD,ADMINMODE,LANGTEST))
 school22 <- read.fst("01 Bases/pisa22_school.fst") %>% 
   dplyr::select(-c(CNTRYID,CYC,NatCen,REGION,STRATUM,SUBNATIO,OECD,ADMINMODE,LANGTEST_QQQ))
-
-```
-
-```{r}
-
-# pisa17_lac <- pisa17 %>% 
-#   filter(CNT %in% c("Ecuador","Guatemala","Honduras","Paraguay")) %>% 
-#   mutate(BELONG = as.factor(as.character(BELONG))) %>% 
-#   rename(
-#     hisei = HISEI
-#   )
-# 
-# comunes <- intersect(names(pisa15), names(pisa17_lac))   # 171
-# 
-# # Limpias etiquetas solo en las comunes, pero te quedas con todo pisa15
-# db1c <- pisa15 %>% 
-#   mutate(across(all_of(comunes), haven::zap_labels))
-# 
-# db2c <- pisa17_lac %>% 
-#   mutate(across(all_of(comunes), haven::zap_labels))
-# 
-# # Ahora sí, unes todo. pisa15_int tendrá TODAS las columnas de pisa15
-# # más las columnas extra que tenga pisa17_lac.
-# pisa15_int <- bind_rows(db1c, db2c)
-# 
-# #===================================================================#
-# # Directores
-# #===================================================================#
-# 
-# pisa17_sch_lac <- school17 %>% 
-#   filter(CNT %in% c("Ecuador","Guatemala","Honduras","Paraguay"))
-# 
-# comunes_sch <- intersect(names(school15), names(pisa17_sch_lac))
-# 
-# # Limpias etiquetas solo en las comunes, pero te quedas con todo pisa15
-# db1sch <- school15 %>% 
-#   mutate(across(all_of(comunes_sch), haven::zap_labels))
-# 
-# db2sch <- pisa17_sch_lac %>% 
-#   mutate(across(all_of(comunes_sch), haven::zap_labels))
-# 
-# school15_int <- bind_rows(db1sch, db2sch)
-# 
-# 
-# table(pisa15_int$his)
 
 ```
 

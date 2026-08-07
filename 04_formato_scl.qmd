@@ -1,5 +1,6 @@
 ---
-title: "Untitled"
+title: "Formato de bases SCL"
+author: "Manuel Marcos"
 format: html
 ---
 
@@ -52,20 +53,24 @@ source(url("https://raw.githack.com/Manumarc/PISA_indicators/main/pisa_indicator
 
 ```
 
-```{r}
+```{r Bases de datos}
 
 bd_apr <- read.xlsx("01 Bases/bd_logro_2000_2022.xlsx")
 bd_rf <- read.xlsx("01 Bases/bd_rf_2009_2022.xlsx")
 
 ```
 
-```{r}
+```{r Transformación de formato de bases}
 
 bd01 <- pisa_to_scldata(bd_apr, "Aprendizaje")
 
 bd02 <- pisa_to_scldata(bd_rf, "Recursos")
 
-bd_rerfis <- rbind(bd01,bd02)
+bd_integrada <- rbind(bd01,bd02)
+
+# Guardado de datos
+
+write.xlsx(bd_integrada, file = "01 Bases/Indicadores_PISA_20260805.xlsx")
 
 ```
 

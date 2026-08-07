@@ -1,5 +1,6 @@
 ---
-title: "Untitled"
+title: "Formato de bases a .fst"
+author: "Manuel Marcos"
 format: html
 ---
 
@@ -49,6 +50,7 @@ pisa06 <- read.spss("01 Bases/PISA2006_pv.sav", to.data.frame = T)
 pisa09 <- read.spss("01 Bases/PISA2009_pv.sav", to.data.frame = T) 
 pisa12 <- read.spss("01 Bases/PISA2012_pv.sav", to.data.frame = T) 
 pisa15 <- read.spss("01 Bases/PISA2015_pv.sav", to.data.frame = T) 
+pisaD17 <- read.spss("01 Bases/PISAD2017_pv.sav", to.data.frame = T)
 pisa18 <- read.spss("01 Bases/PISA2018_pv.sav", to.data.frame = T) 
 pisa22 <- read.spss("01 Bases/PISA2022_pv.sav", to.data.frame = T) 
 
@@ -62,6 +64,7 @@ school06 <- read.spss("01 Bases/PISA2006_school.sav", to.data.frame = T)
 school09 <- read.spss("01 Bases/PISA2009_school.sav", to.data.frame = T) 
 school12 <- read.spss("01 Bases/PISA2012_school.sav", to.data.frame = T) 
 school15 <- read.spss("01 Bases/PISA2015_school.sav", to.data.frame = T) 
+schoolD17 <- read.spss("01 Bases/PISAD2017_school.sav", to.data.frame = T)  
 school18 <- read.spss("01 Bases/PISA2018_school.sav", to.data.frame = T)
 school22 <- read.spss("01 Bases/PISA2022_school.sav", to.data.frame = T) 
 
@@ -78,6 +81,7 @@ write.fst(pisa06, path = "01 Bases/pisa06_pv.fst")
 write.fst(pisa09, path = "01 Bases/pisa09_pv.fst")
 write.fst(pisa12, path = "01 Bases/pisa12_pv.fst")
 write.fst(pisa15, path = "01 Bases/pisa15_pv.fst")
+write.fst(pisaD17, path = "01 Bases/pisa17_pv.fst")
 write.fst(pisa18, path = "01 Bases/pisa18_pv.fst")
 write.fst(pisa22, path = "01 Bases/pisa22_pv.fst")
 
@@ -91,6 +95,7 @@ write.fst(school06, path = "01 Bases/pisa06_school.fst")
 write.fst(school09, path = "01 Bases/pisa09_school.fst")
 write.fst(school12, path = "01 Bases/pisa12_school.fst")
 write.fst(school15, path = "01 Bases/pisa15_school.fst")
+write.fst(schoolD17, path = "01 Bases/pisa17_schoo.fst")
 write.fst(school18, path = "01 Bases/pisa18_school.fst")
 write.fst(school22, path = "01 Bases/pisa22_school.fst")
 
