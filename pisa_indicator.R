@@ -897,7 +897,6 @@ pisa_to_scldata <- function(bd_datos, tipo) {
   } else if (tipo %in% "Recursos") {
  
     a2 <- bd_datos %>%
-      rename(valor = estimacion) %>%
       limpiar_pais() %>%
       mutate(
         indicator = case_when(
