@@ -103,7 +103,7 @@ calcular_pisa <- function(data, anio, compet, calculo, niv_estrat) {
   ) 
   
   lac_15 <- c(
-    "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay"  
+    "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay","Ecuador","Guatemala","Honduras","Paraguay"  
   )
   
   # PISA 2018 #
@@ -532,7 +532,7 @@ calcular_refis <- function(bd_datos,
   )
 
   lac_15 <- c(
-    "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay"
+    "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay","Ecuador","Guatemala","Honduras","Paraguay"
   )
 
   # PISA 2018 #
