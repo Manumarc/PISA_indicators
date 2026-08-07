@@ -205,6 +205,9 @@ A la base de datos resultante de PISA se le aplica la función "pisa_to_scldata"
 # Dar formato de scl data #
 #-------------------------#
 
-pisa_to_scldata(bd_datos)
+pisa_to_scldata(
+  bd_datos,
+  tipo           # Puede tomar los valores "Aprendizaje" y "Recursos"
+)
 ```
 
