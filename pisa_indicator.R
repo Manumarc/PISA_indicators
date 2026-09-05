@@ -97,14 +97,21 @@ calcular_pisa <- function(data, anio, compet, calculo, niv_estrat) {
   
   # PISA 2015 #
   #-----------#
-  
+
   oecd_15 <- c(
     "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Latvia", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
   ) 
-  
+
   lac_15 <- c(
-    "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay","Ecuador","Guatemala","Honduras","Paraguay"  
+    "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay"
   )
+  
+  #PISA 2017 #
+  #----------#
+  
+  oecd_17 <- NA
+  
+  lac_17 <- c("Ecuador","Guatemala","Honduras","Paraguay")
   
   # PISA 2018 #
   #-----------#
@@ -529,11 +536,18 @@ calcular_refis <- function(bd_datos,
 
   oecd_15 <- c(
     "Australia", "Austria", "Belgium", "Canada", "Chile", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Korea", "Latvia", "Luxembourg", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "United Kingdom", "United States"
-  )
+  ) 
 
   lac_15 <- c(
-    "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay","Ecuador","Guatemala","Honduras","Paraguay"
+    "Chile", "Mexico", "Brazil", "Colombia", "Costa Rica", "Dominican Republic", "Peru", "Trinidad and Tobago", "Uruguay"
   )
+  
+  #PISA 2017 #
+  #----------#
+  
+  oecd_17 <- NA
+  
+  lac_17 <- c("Ecuador","Guatemala","Honduras","Paraguay")
 
   # PISA 2018 #
   #-----------#
