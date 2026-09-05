@@ -152,22 +152,23 @@ percentil_cima <- function(var, weights, percentil = "quintil", normwt = TRUE) {
   
   k <- n_grupos[[percentil]]
   probs <- seq_len(k-1)/k
-  etiquetas <- paste0("Grupo Q", seq_len(k))
+  etiquetas <- paste0("quintile_", seq_len(k))
   
-  # factor vacío con los niveles correctos, para los casos degenerados
+  # factor vacío con los niveles correctos
   vacio <- factor(rep(NA_character_, length(var)),
                   levels = etiquetas, ordered = TRUE)
   
   # casos utilizables: sin NA en var ni en el peso, y peso positivo
   ok <- !is.na(var) & !is.na(weights) & weights > 0
   
-  # sin datos suficientes o sin variabilidad -> NA en vez de error
+  # sin datos suficientes o sin variabilidad -> NA
   if (sum(ok) < k || dplyr::n_distinct(var[ok]) < k) {
     warning("Grupo sin datos suficientes para ", k, " grupos; se devuelve NA.",
             call. = FALSE)
     return(vacio)
   }
   
+  # Paso 1: Calcular cortes usando pesos 
   cortes <- Hmisc::wtd.quantile(
     var[ok], 
     weights = weights[ok], 
@@ -177,21 +178,53 @@ percentil_cima <- function(var, weights, percentil = "quintil", normwt = TRUE) {
     normwt = normwt
   )
   
-  # cortes empatados -> breaks no estrictamente crecientes -> cut() falla
+  # Si hay cortes empatados, no se puede asignar bien -> NA
   if (any(duplicated(cortes))) {
     warning("Cortes empatados en ", percentil, "; se devuelve NA.", call. = FALSE)
     return(vacio)
   }
   
-  cut(
-    var,
-    breaks = c(-Inf, cortes, Inf),
-    labels = etiquetas,
-    right = TRUE,                               
-    ordered_result = TRUE
+  # ----------------------------------------------------------------
+  # Asignación basada en pesos acumulados (NUEVO)
+  # ----------------------------------------------------------------
+  
+  # Solo trabajamos con los casos válidos para asignar
+  df <- data.frame(
+    idx = which(ok),            # posición original
+    var = var[ok],
+    weights = weights[ok]
   )
   
-} 
+  # Ordenar por variable (de menor a mayor)
+  df <- df[order(df$var), ]
+  
+  # Calcular peso acumulado
+  df$cum_weight <- cumsum(df$weights)
+  total_weight <- sum(df$weights)
+  
+  # Puntos de corte en términos de peso acumulado (no en valor de var)
+  cut_points <- total_weight * probs  # probs = 0.2, 0.4, 0.6, 0.8 para quintil
+  
+  # Asignar grupo: el grupo 1 empieza en 0, el grupo k termina en total_weight
+  df$grupo <- findInterval(df$cum_weight, 
+                           vec = c(0, cut_points, total_weight), 
+                           rightmost.closed = TRUE)
+  
+  df$grupo <- pmin(df$grupo, k)   # por si acaso algún valor queda en k+1
+  df$grupo <- pmax(df$grupo, 1)   # por si acaso algún valor queda en 0
+  
+  # Crear factor ordenado con las etiquetas correspondientes
+  df$grupo_factor <- factor(df$grupo, 
+                            levels = 1:k, 
+                            labels = etiquetas, 
+                            ordered = TRUE)
+  
+  # Reconstruir el vector de salida en el orden original
+  resultado <- vacio  # empezamos con NA para todos
+  resultado[df$idx] <- df$grupo_factor
+  
+  return(resultado)
+}
 
 ```
 
