@@ -13,6 +13,7 @@ library(survey)     # Permite analizar datos provenientes de muestras complejas
 library(scales)     # Permite editar tonos, formatos de número y texto
 library(intsvy)     # Permite analizar los datos de PISA y otras International Large Scale Assessments
 library(furrr)      # Permite realizar análisis paralelizado
+library(countrycode) # Permite extraer nombres y códigos de países
 ```
 
 ## Cargar las funciones
