@@ -863,8 +863,12 @@ pisa_to_scldata <- function(bd_datos, tipo) {
  
   finalizar <- function(nac, estrat) {
     bind_rows(
-      nac    %>% ensure_dims() %>% add_constantes(),
-      estrat %>% ensure_dims() %>% add_constantes()
+      nac %>% 
+        ensure_dims() %>% 
+        add_constantes(),
+      estrat %>% 
+        ensure_dims() %>% 
+        add_constantes()
     ) %>%
       dplyr::select(all_of(orden))
   }
@@ -892,7 +896,7 @@ pisa_to_scldata <- function(bd_datos, tipo) {
     nac <- a1 %>%
       filter(niv_estrat == "Nacional") %>%
       dplyr::select(year = anio, isoalpha3 = pais, value = valor, se, indicator) %>%
-      mutate(cv = se / value)
+      mutate(cv = se/value)
  
     # Estratos
     estrat <- a1 %>%
@@ -937,6 +941,13 @@ pisa_to_scldata <- function(bd_datos, tipo) {
           funding %in% c("Private") ~ "private_f",
           funding %in% c("Public") ~ "public_f",
           TRUE ~ funding
+        )
+      ) %>% 
+      mutate(
+        language = case_when(
+          language %in% c("Language of test") ~ "language",
+          language %in% c("Another language") ~ "no_language",
+          TRUE ~language
         )
       )
  
@@ -1006,6 +1017,13 @@ pisa_to_scldata <- function(bd_datos, tipo) {
           funding %in% c("Private") ~ "private_f",
           funding %in% c("Public") ~ "public_f",
           TRUE ~ funding
+        )
+      ) %>% 
+      mutate(
+        language = case_when(
+          language %in% c("Language of test") ~ "language",
+          language %in% c("Another language") ~ "no_language",
+          TRUE ~language
         )
       )
  
