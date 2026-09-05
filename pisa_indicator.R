@@ -803,23 +803,23 @@ pisa_to_scldata <- function(bd_datos, tipo) {
  
   add_constantes <- function(df) {
     df %>% mutate(
-      iddate      = "year",
-      idgeo       = "country",
-      source      = "PISA",
-      sample      = NA,
+      iddate = "year",
+      idgeo = "country",
+      source = "PISA",
+      sample = NA,
       collection_es = "Evaluaciones de aprendizaje",
       collection_en = "Learning assessments",
-      theme_es    = "Educación",
-      theme_en    = "Education",
-      month       = NA_character_,
+      theme_es = "Educación",
+      theme_en = "Education",
+      month = NA_character_,
       totals_dummy = 1,
       admin1_ipums = NA,
-      level       = NA,
-      dummy_GDI   = 0,
+      level = NA,
+      dummy_GDI = 0,
       scldata3_highlight_profile = NA,
-      scldata3_highlight_census  = NA,
+      scldata3_highlight_census = NA,
       quality_check = NA,
-      dt          = paste0(year, "-01-01"),
+      dt = paste0(year, "-01-01"),
       indicadoresAbleToBeMoreThanOne = 0
     )
   }
@@ -861,15 +861,15 @@ pisa_to_scldata <- function(bd_datos, tipo) {
       limpiar_pais() %>%
       mutate(
         indicator = case_when(
-          is.na(Benchmarks) & competencia %in% "Lectura"    ~ "puntaje_prom_lec",
+          is.na(Benchmarks) & competencia %in% "Lectura" ~ "puntaje_prom_lec",
           is.na(Benchmarks) & competencia %in% "Matemática" ~ "puntaje_prom_mat",
-          is.na(Benchmarks) & competencia %in% "Ciencia"    ~ "puntaje_prom_cie",
+          is.na(Benchmarks) & competencia %in% "Ciencia" ~ "puntaje_prom_cie",
           Benchmarks %in% c("<= 407.47") ~ "tasa_bajo_desemp_lec",
           Benchmarks %in% c("<= 420.07") ~ "tasa_bajo_desemp_mat",
           Benchmarks %in% c("<= 409.54") ~ "tasa_bajo_desemp_cie",
-          Benchmarks %in% c("> 625.61")  ~ "tasa_alto_desemp_lec",
-          Benchmarks %in% c("> 606.99")  ~ "tasa_alto_desemp_mat",
-          Benchmarks %in% c("> 633.33")  ~ "tasa_alto_desemp_cie",
+          Benchmarks %in% c("> 625.61") ~ "tasa_alto_desemp_lec",
+          Benchmarks %in% c("> 606.99") ~ "tasa_alto_desemp_mat",
+          Benchmarks %in% c("> 633.33") ~ "tasa_alto_desemp_cie",
           TRUE ~ NA_character_
         )
       )
@@ -883,14 +883,48 @@ pisa_to_scldata <- function(bd_datos, tipo) {
     # Estratos
     estrat <- a1 %>%
       filter(niv_estrat == "Estratos") %>%
-      dplyr::select(year = anio, isoalpha3 = pais, estrato, categoria,
-                    value = valor, se, indicator) %>%
+      dplyr::select(
+        year = anio, isoalpha3 = pais, estrato, categoria,
+        value = valor, se, indicator
+      ) %>%
       mutate(.obs = row_number()) %>%
-      pivot_wider(names_from = estrato, values_from = categoria,
-                  values_fill = "Total") %>%
+      pivot_wider(
+        names_from = estrato, 
+        values_from = categoria,
+        values_fill = "Total"
+      ) %>%
       dplyr::select(-.obs) %>%
       rename(any_of(rename_estratos)) %>%
-      mutate(cv = se / value)
+      mutate(cv = se/value) %>% 
+      mutate(
+        area = case_when(
+          area %in% c("Rural") ~ "rural",
+          area %in% c("Urban") ~ "urban",
+          TRUE ~ area
+        )
+      ) %>% 
+      mutate(
+        sex = case_when(
+          sex %in% c("Male") ~ "man",
+          sex %in% c("Female") ~ "woman",
+          TRUE ~ sex
+        )
+      ) %>% 
+      mutate(
+        management = case_when(
+          management %in% c("Private") ~ "private",
+          management %in% c("Public") ~ "public",
+          TRUE ~ management
+        )
+      ) %>% 
+      mutate(
+        funding = case_when(
+          funding %in% c("Mixed") ~ "mixed_f",
+          funding %in% c("Private") ~ "private_f",
+          funding %in% c("Public") ~ "public_f",
+          TRUE ~ funding
+        )
+      )
  
     finalizar(nac, estrat)
  
@@ -900,16 +934,16 @@ pisa_to_scldata <- function(bd_datos, tipo) {
       limpiar_pais() %>%
       mutate(
         indicator = case_when(
-          indicator %in% "acceso_pc"       ~ "Acceso_Compu",
+          indicator %in% "acceso_pc" ~ "Acceso_Compu",
           indicator %in% "acceso_internet" ~ "Acceso_Internet",
-          indicator %in% "comp_est"        ~ "Estudiantes_Compu",
-          indicator %in% "tablet_est"      ~ "Estudiantes_Tableta",
-          indicator %in% "dig_dev_scie"    ~ "dig_dev_sci",
+          indicator %in% "comp_est" ~ "Estudiantes_Compu",
+          indicator %in% "tablet_est" ~ "Estudiantes_Tableta",
+          indicator %in% "dig_dev_scie" ~ "dig_dev_sci",
           TRUE ~ indicator
         )
       ) %>%
       filter(!(indicator %in% "Acceso_Internet" & categoria %in% "Sin acceso")) %>%
-      filter(!(indicator %in% "Acceso_Compu"    & categoria %in% "Con acceso"))
+      filter(!(indicator %in% "Acceso_Compu" & categoria %in% "Con acceso"))
  
     # Nacional 
     a2_nac <- a2 %>%
@@ -923,11 +957,43 @@ pisa_to_scldata <- function(bd_datos, tipo) {
       dplyr::select(year, isoalpha3 = pais, estrato, nivel_estrato,
                     value = valor, se, indicator) %>%
       mutate(.obs = row_number()) %>%
-      pivot_wider(names_from = estrato, values_from = nivel_estrato,
-                  values_fill = "Total") %>%
+      pivot_wider(
+        names_from = estrato, 
+        values_from = nivel_estrato,
+                  values_fill = "Total"
+        ) %>%
       dplyr::select(-.obs) %>%
       rename(any_of(rename_estratos)) %>%
-      mutate(cv = NA)
+      mutate(cv = NA) %>% 
+      mutate(
+        area = case_when(
+          area %in% c("Rural") ~ "rural",
+          area %in% c("Urban") ~ "urban",
+          TRUE ~ area
+        )
+      ) %>% 
+      mutate(
+        sex = case_when(
+          sex %in% c("Male") ~ "man",
+          sex %in% c("Female") ~ "woman",
+          TRUE ~ sex
+        )
+      ) %>% 
+      mutate(
+        management = case_when(
+          management %in% c("Private") ~ "private",
+          management %in% c("Public") ~ "public",
+          TRUE ~ management
+        )
+      ) %>% 
+      mutate(
+        funding = case_when(
+          funding %in% c("Mixed") ~ "mixed_f",
+          funding %in% c("Private") ~ "private_f",
+          funding %in% c("Public") ~ "public_f",
+          TRUE ~ funding
+        )
+      )
  
     finalizar(a2_nac, a2_estrat)
   }
