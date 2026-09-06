@@ -166,6 +166,9 @@ calcular_pisa <- function(data, anio, compet, calculo, niv_estrat) {
   } else if (anio == 2015) {
     oecd <- oecd_15
     lac  <- lac_15
+  } else if (anio == 2017) {
+    oecd <- oecd_17
+    lac  <- lac_17
   } else if (anio == 2018) {
     oecd <- oecd_18
     lac  <- lac_18
@@ -593,6 +596,9 @@ calcular_refis <- function(bd_datos,
   } else if (anio == 2015) {
     oecd <- oecd_15
     lac  <- lac_15
+  } else if (anio == 2017) {
+    oecd <- oecd_17
+    lac  <- lac_17
   } else if (anio == 2018) {
     oecd <- oecd_18
     lac  <- lac_18
