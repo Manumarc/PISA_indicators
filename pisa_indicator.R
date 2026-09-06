@@ -139,11 +139,11 @@ calcular_pisa <- function(data, anio, compet, calculo, niv_estrat) {
   #-----------#
   
   oecd_25 <- c(
-    "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Costa Rica", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Türkiye", "United Kingdom", "United States"
-  ) # Actualizar
+    "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Costa Rica", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Luxembourg","Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Türkiye", "United Kingdom", "United States"
+  )
   
   lac_25 <- c(
-    "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Uruguay"  
+    "Brazil", "Chile", "Colombia","Costa Rica", "Mexico", "Argentina", "Dominican Republic", "Ecuador", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Trinidad and Tobago", "Uruguay"  
   ) 
   
   # Actualizar
@@ -576,14 +576,14 @@ calcular_refis <- function(bd_datos,
 
   # PISA 2025 #
   #-----------#
-
+  
   oecd_25 <- c(
-    "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Costa Rica", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Türkiye", "United Kingdom", "United States"
-  ) # Actualizar
-
-  lac_25 <- c(
-    "Chile", "Mexico", "Colombia", "Argentina", "Brazil","Costa Rica", "Dominican Republic", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Uruguay"
+    "Australia", "Austria", "Belgium", "Canada", "Chile", "Colombia", "Costa Rica", "Czech Republic", "Denmark", "Finland", "Estonia", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Israel", "Italy", "Japan", "Lithuania", "Korea", "Latvia", "Luxembourg","Mexico", "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Slovak Republic", "Slovenia", "Spain", "Sweden", "Switzerland", "Türkiye", "United Kingdom", "United States"
   )
+  
+  lac_25 <- c(
+    "Brazil", "Chile", "Colombia","Costa Rica", "Mexico", "Argentina", "Dominican Republic", "Ecuador", "El Salvador", "Guatemala", "Jamaica", "Panama", "Paraguay", "Peru", "Trinidad and Tobago", "Uruguay"  
+  ) 
 
   # Actualizar
 
@@ -955,7 +955,13 @@ pisa_to_scldata <- function(bd_datos, tipo) {
           language %in% c("Another language") ~ "no_language",
           TRUE ~language
         )
+      ) %>%
+    mutate(
+      source = case_when(
+        year %in% c(2017) ~ "PISA-D",
+        TRUE ~ source
       )
+    )
  
     finalizar(nac, estrat)
  
@@ -1031,7 +1037,13 @@ pisa_to_scldata <- function(bd_datos, tipo) {
           language %in% c("Another language") ~ "no_language",
           TRUE ~language
         )
+      ) %>%
+    mutate(
+      source = case_when(
+        year %in% c(2017) ~ "PISA-D",
+        TRUE ~ source
       )
+    )
  
     finalizar(a2_nac, a2_estrat)
   }
