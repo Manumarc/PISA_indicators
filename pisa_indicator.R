@@ -825,7 +825,7 @@ pisa_to_scldata <- function(bd_datos, tipo) {
     df %>% mutate(
       iddate = "year",
       idgeo = "country",
-      source = "PISA",
+      source = if_else(year %in% c(2017), "PISA-D", "PISA"),
       sample = NA,
       collection_es = "Evaluaciones de aprendizaje",
       collection_en = "Learning assessments",
@@ -902,8 +902,8 @@ pisa_to_scldata <- function(bd_datos, tipo) {
     nac <- a1 %>%
       filter(niv_estrat == "Nacional") %>%
       dplyr::select(year = anio, isoalpha3 = pais, value = valor, se, indicator) %>%
-      mutate(cv = se/value)
- 
+      mutate(cv = se/value) 
+    
     # Estratos
     estrat <- a1 %>%
       filter(niv_estrat == "Estratos") %>%
@@ -955,9 +955,8 @@ pisa_to_scldata <- function(bd_datos, tipo) {
           language %in% c("Another language") ~ "no_language",
           TRUE ~language
         )
-      ) %>%
-    mutate(source = if_else(year %in% c(2017), "PISA-D", "PISA"))
- 
+      )
+    
     finalizar(nac, estrat)
  
   } else if (tipo %in% "Recursos") {
@@ -981,7 +980,7 @@ pisa_to_scldata <- function(bd_datos, tipo) {
     a2_nac <- a2 %>%
       filter(estrato %in% "Nacional") %>%
       dplyr::select(year, isoalpha3 = pais, value = valor, se, indicator) %>%
-      mutate(cv = NA)
+      mutate(cv = NA) 
  
     # Estratos
     a2_estrat <- a2 %>%
@@ -1032,8 +1031,7 @@ pisa_to_scldata <- function(bd_datos, tipo) {
           language %in% c("Another language") ~ "no_language",
           TRUE ~language
         )
-      ) %>%
-    mutate(source = if_else(year %in% c(2017), "PISA-D", "PISA"))
+      ) 
  
     finalizar(a2_nac, a2_estrat)
   }
