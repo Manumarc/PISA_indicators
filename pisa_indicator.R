@@ -956,12 +956,7 @@ pisa_to_scldata <- function(bd_datos, tipo) {
           TRUE ~language
         )
       ) %>%
-    mutate(
-      source = case_when(
-        year %in% c(2017) ~ "PISA-D",
-        TRUE ~ .data$source 
-      )
-    )
+    mutate(source = if_else(year %in% c(2017), "PISA-D", "PISA"))
  
     finalizar(nac, estrat)
  
@@ -1038,12 +1033,7 @@ pisa_to_scldata <- function(bd_datos, tipo) {
           TRUE ~language
         )
       ) %>%
-    mutate(
-      source = case_when(
-        year %in% c(2017) ~ "PISA-D",
-        TRUE ~ .data$source 
-      )
-    )
+    mutate(source = if_else(year %in% c(2017), "PISA-D", "PISA"))
  
     finalizar(a2_nac, a2_estrat)
   }
