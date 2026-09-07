@@ -957,9 +957,9 @@ pisa_to_scldata <- function(bd_datos, tipo) {
         )
       ) %>%
     mutate(
-      source = case_when(
+      `source` = case_when(
         year %in% c(2017) ~ "PISA-D",
-        TRUE ~ source
+        TRUE ~ `source`
       )
     )
  
@@ -1039,9 +1039,9 @@ pisa_to_scldata <- function(bd_datos, tipo) {
         )
       ) %>%
     mutate(
-      source = case_when(
+      `source` = case_when(
         year %in% c(2017) ~ "PISA-D",
-        TRUE ~ source
+        TRUE ~ `source`
       )
     )
  
